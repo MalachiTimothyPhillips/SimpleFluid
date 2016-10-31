@@ -1,0 +1,67 @@
+<html>
+<head>
+<title>main.cpp</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,0); }
+.s1 { color: rgb(0,128,0); font-weight: bold; }
+.s2 { color: rgb(0,0,0); }
+.s3 { color: rgb(0,0,128); font-weight: bold; }
+.s4 { color: rgb(128,128,128); font-style: italic; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+main.cpp</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">#include</span><span class="s1"> &lt;iostream&gt;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &quot;BoundaryCond.h&quot;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &quot;IntCond.h&quot;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &quot;RuntimeParameters.h&quot;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &quot;SolutionProcedure.h&quot;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &lt;vector&gt;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &quot;RuntimeJoke.h&quot;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &lt;ostream&gt;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &lt;stdlib.h&gt;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &lt;iostream&gt;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &lt;sstream&gt;</span><span class="s2"> 
+</span><span class="s0">#include</span><span class="s1"> &lt;fstream&gt;</span><span class="s2"> 
+ 
+</span><span class="s3">int </span><span class="s2">main(</span><span class="s3">int </span><span class="s2">argc, </span><span class="s3">char </span><span class="s2">*argv[]) { 
+ 
+    </span><span class="s4">// Test user specified input file</span><span class="s2"> 
+    </span><span class="s3">if </span><span class="s2">(argc != </span><span class="s5">4</span><span class="s2">){ 
+        std::cout &lt;&lt; </span><span class="s1">&quot;Error: specify&quot; </span><span class="s2">&lt;&lt; std::endl 
+                  &lt;&lt; </span><span class="s1">&quot;Type of PDE&quot; </span><span class="s2">&lt;&lt; std::endl 
+                  &lt;&lt; </span><span class="s1">&quot;Inputfile&quot; </span><span class="s2">&lt;&lt; std::endl 
+                  &lt;&lt; </span><span class="s1">&quot;Outputfile&quot; </span><span class="s2">&lt;&lt; std::endl; 
+    } 
+ 
+    </span><span class="s4">// Use first string passed to determine what type of equation is being solved</span><span class="s2"> 
+    std::string whichPDE = argv[</span><span class="s5">1</span><span class="s2">]; 
+ 
+    </span><span class="s4">// Set PDE Type in SolutionProcedure</span><span class="s2"> 
+    SolutionProcedure* currentProcedure = SolutionProcedure::determine_solution_procedure(whichPDE); 
+ 
+    </span><span class="s4">// create output file</span><span class="s2"> 
+    std::string userOutputFile = argv[</span><span class="s5">3</span><span class="s2">]; 
+ 
+    </span><span class="s4">// pass from command line the filename to be used for procedure</span><span class="s2"> 
+    std::string userRuntimeArguments = argv[</span><span class="s5">2</span><span class="s2">]; 
+    currentProcedure-&gt;start_procedure(userRuntimeArguments, userOutputFile); 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    </span><span class="s3">return </span><span class="s5">0</span><span class="s2">; 
+}</span></pre>
+</body>
+</html>

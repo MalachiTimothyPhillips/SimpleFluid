@@ -1,0 +1,265 @@
+<html>
+<head>
+<title>RuntimeParameters.h</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,0); }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,128); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+RuntimeParameters.h</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//</span><span class="s1"> 
+</span><span class="s0">// Created by Malachi Phillips on 9/25/16.</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+ 
+</span><span class="s2">#ifndef </span><span class="s1">CFD_HW_RUNTIMEPARAMETERS_H 
+</span><span class="s2">#define </span><span class="s1">CFD_HW_RUNTIMEPARAMETERS_H 
+ 
+</span><span class="s0">// Controls solution parameters, from user</span><span class="s1"> 
+</span><span class="s0">/* 
+ * User must input grid spacing (dx), length, and total time. 
+ * CFL, dt are inferred from these settings to ensure a reasonable PDE solution 
+ */</span><span class="s1"> 
+ 
+</span><span class="s2">#include</span><span class="s3"> &lt;string&gt;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &lt;vector&gt;</span><span class="s1"> 
+ 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Base class for run time parameters 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">//class RuntimeParameters{</span><span class="s1"> 
+</span><span class="s0">//public:</span><span class="s1"> 
+</span><span class="s0">//    static RuntimeParameters* create_runtime_param(std::string&amp; whichPDE);</span><span class="s1"> 
+</span><span class="s0">//    unsigned int get_space_iterations(){return space_iterations_;};</span><span class="s1"> 
+</span><span class="s0">//    unsigned int get_time_iterations(){return time_iterations_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_wall_value(){return wallValue_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_xo(){return xo_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_xf(){return xf_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_dx(){return dx_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_to(){return to_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_CFL(){return CFL_;};</span><span class="s1"> 
+</span><span class="s0">//    double get_alpha(){return alpha_;};</span><span class="s1"> 
+</span><span class="s0">//    std::vector&lt;double&gt;&amp; get_wall_vals(){return wallValues_;};</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+</span><span class="s0">//    void read_parameters_from_file(std::string&amp; runtime_args) = 0;</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+</span><span class="s0">//protected:</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+</span><span class="s0">//    unsigned int space_iterations_;</span><span class="s1"> 
+</span><span class="s0">//    unsigned int time_iterations_;</span><span class="s1"> 
+</span><span class="s0">//    double wallValue_;</span><span class="s1"> 
+</span><span class="s0">//    double xo_;</span><span class="s1"> 
+</span><span class="s0">//    double xf_;</span><span class="s1"> 
+</span><span class="s0">//    double dx_;</span><span class="s1"> 
+</span><span class="s0">//    double to_;</span><span class="s1"> 
+</span><span class="s0">//    double CFL_;</span><span class="s1"> 
+</span><span class="s0">//    double alpha_;</span><span class="s1"> 
+</span><span class="s0">//    std::vector&lt;double&gt; wallValues_;</span><span class="s1"> 
+</span><span class="s0">//    void set_space_iterations();</span><span class="s1"> 
+</span><span class="s0">//    void set_wall_value();</span><span class="s1"> 
+</span><span class="s0">//    void set_wall_boundary(std::vector&lt;double&gt;&amp; wallVals);</span><span class="s1"> 
+</span><span class="s0">//};</span><span class="s1"> 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Linear wave runtime parameter handler 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">RuntimeParametersLinWave{ 
+ 
+</span><span class="s4">public</span><span class="s1">: 
+ 
+    </span><span class="s0">// Read in parameters from input file</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">read_parameters_from_file(std::string&amp; runtime_args); 
+ 
+    </span><span class="s4">double </span><span class="s1">get_to(){</span><span class="s4">return </span><span class="s1">to_;}; 
+    </span><span class="s4">double </span><span class="s1">get_tf(){</span><span class="s4">return </span><span class="s1">tf_;}; 
+    </span><span class="s4">double </span><span class="s1">get_dx(){</span><span class="s4">return </span><span class="s1">dx_;}; 
+    </span><span class="s4">double </span><span class="s1">get_dt(){</span><span class="s4">return </span><span class="s1">dt_;}; 
+    </span><span class="s4">double </span><span class="s1">get_CFL(){</span><span class="s4">return </span><span class="s1">CFL_;}; 
+    </span><span class="s4">double </span><span class="s1">get_xo(){</span><span class="s4">return </span><span class="s1">xo_;}; 
+    </span><span class="s4">double </span><span class="s1">get_xf(){</span><span class="s4">return </span><span class="s1">xf_;}; 
+    </span><span class="s4">double </span><span class="s1">get_c(){</span><span class="s4">return </span><span class="s1">c_;}; 
+    </span><span class="s4">double </span><span class="s1">get_wall_value() {</span><span class="s4">return </span><span class="s1">wallVal_;}; 
+    </span><span class="s4">unsigned int </span><span class="s1">get_time_iterations(){</span><span class="s4">return </span><span class="s1">time_iterations_;}; 
+    </span><span class="s4">unsigned int </span><span class="s1">get_space_iterations(){</span><span class="s4">return </span><span class="s1">space_iterations_;}; 
+ 
+ 
+</span><span class="s4">protected</span><span class="s1">: 
+    </span><span class="s4">double </span><span class="s1">to_; 
+    </span><span class="s4">double </span><span class="s1">tf_; 
+    </span><span class="s4">double </span><span class="s1">dx_; 
+    </span><span class="s4">double </span><span class="s1">dt_; 
+    </span><span class="s4">double </span><span class="s1">CFL_; 
+    </span><span class="s4">double </span><span class="s1">xo_; 
+    </span><span class="s4">double </span><span class="s1">xf_; 
+    </span><span class="s4">double </span><span class="s1">wallVal_; 
+    </span><span class="s4">unsigned int </span><span class="s1">time_iterations_; 
+    </span><span class="s4">unsigned int </span><span class="s1">space_iterations_; 
+    </span><span class="s4">double </span><span class="s1">c_; </span><span class="s0">// constant parameter for wave equation</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">safetyFactor_; </span><span class="s0">// Default:: force CFL to 1 for constant coefficient case</span><span class="s1"> 
+ 
+    </span><span class="s0">// setters not needed - from runtime parameters</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">set_to(</span><span class="s4">double </span><span class="s1">to){to_ = to;}; 
+    </span><span class="s4">void </span><span class="s1">set_tf(</span><span class="s4">double </span><span class="s1">tf){tf_ = tf;}; 
+    </span><span class="s4">void </span><span class="s1">set_dt(</span><span class="s4">double </span><span class="s1">dt){dt_ = dt;}; 
+    </span><span class="s4">void </span><span class="s1">set_dx(</span><span class="s4">double </span><span class="s1">dx){dx_ = dx;}; 
+    </span><span class="s4">void </span><span class="s1">set_xo(</span><span class="s4">double </span><span class="s1">xo){xo_ = xo;}; 
+    </span><span class="s4">void </span><span class="s1">set_xf(</span><span class="s4">double </span><span class="s1">xf){xf_ = xf;}; 
+    </span><span class="s4">void </span><span class="s1">set_c(</span><span class="s4">double </span><span class="s1">c){c_ = c;}; 
+    </span><span class="s4">void </span><span class="s1">set_safety_factor(</span><span class="s4">double </span><span class="s1">safety_factor); 
+    </span><span class="s4">void </span><span class="s1">set_wall_boundary(</span><span class="s4">double </span><span class="s1">wallVal){wallVal_ = wallVal;}; 
+    </span><span class="s4">void </span><span class="s1">set_CFL(); 
+    </span><span class="s4">void </span><span class="s1">set_CFL(</span><span class="s4">double </span><span class="s1">CFL) {CFL_ = CFL;}; 
+    </span><span class="s4">void </span><span class="s1">set_time_iterations(</span><span class="s4">unsigned int </span><span class="s1">timeIterations){ time_iterations_ = timeIterations;}; 
+    </span><span class="s4">void </span><span class="s1">set_space_iterations(); </span><span class="s0">// inferred from CFD number</span><span class="s1"> 
+ 
+</span><span class="s4">private</span><span class="s1">: 
+ 
+}; 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Diffusion PDE runtime parameter handler 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+</span><span class="s4">class </span><span class="s1">RuntimeParametersDiffusion{ 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s0">// Read in parameters from input file</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">read_parameters_from_file(std::string&amp; runtime_args); 
+ 
+    </span><span class="s4">double </span><span class="s1">get_to(){</span><span class="s4">return </span><span class="s1">to_;}; 
+    </span><span class="s4">double </span><span class="s1">get_tf(){</span><span class="s4">return </span><span class="s1">tf_;}; 
+    </span><span class="s4">double </span><span class="s1">get_dx(){</span><span class="s4">return </span><span class="s1">dx_;}; 
+    </span><span class="s4">double </span><span class="s1">get_dt(){</span><span class="s4">return </span><span class="s1">dt_;}; 
+    </span><span class="s4">double </span><span class="s1">get_CFL(){</span><span class="s4">return </span><span class="s1">CFL_;}; 
+    </span><span class="s4">double </span><span class="s1">get_xo(){</span><span class="s4">return </span><span class="s1">xo_;}; 
+    </span><span class="s4">double </span><span class="s1">get_xf(){</span><span class="s4">return </span><span class="s1">xf_;}; 
+    </span><span class="s4">double </span><span class="s1">get_nu(){</span><span class="s4">return </span><span class="s1">nu_;}; 
+    </span><span class="s4">double </span><span class="s1">get_wall_value() {</span><span class="s4">return </span><span class="s1">wallVal_;}; 
+    </span><span class="s4">unsigned int </span><span class="s1">get_time_iterations(){</span><span class="s4">return </span><span class="s1">time_iterations_;}; 
+    </span><span class="s4">unsigned int </span><span class="s1">get_space_iterations(){</span><span class="s4">return </span><span class="s1">space_iterations_;}; 
+    </span><span class="s4">double </span><span class="s1">get_alpha(){</span><span class="s4">return </span><span class="s1">alpha_;}; 
+ 
+    </span><span class="s4">void </span><span class="s1">add_wall_value(</span><span class="s4">double </span><span class="s1">wallValue){wallValues_.push_back(wallValue);}; 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; get_wall_vals(){</span><span class="s4">return </span><span class="s1">wallValues_;}; 
+ 
+</span><span class="s4">protected</span><span class="s1">: 
+    </span><span class="s4">double </span><span class="s1">to_; 
+    </span><span class="s4">double </span><span class="s1">tf_; 
+    </span><span class="s4">double </span><span class="s1">dx_; 
+    </span><span class="s4">double </span><span class="s1">dt_; 
+    </span><span class="s4">double </span><span class="s1">CFL_; 
+    </span><span class="s4">double </span><span class="s1">xo_; 
+    </span><span class="s4">double </span><span class="s1">xf_; 
+    </span><span class="s4">double </span><span class="s1">wallVal_; 
+    </span><span class="s4">unsigned int </span><span class="s1">time_iterations_; 
+    </span><span class="s4">unsigned int </span><span class="s1">space_iterations_; 
+    </span><span class="s4">double </span><span class="s1">nu_; </span><span class="s0">// constant parameter for wave equation</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">safetyFactor_; </span><span class="s0">// Default:: force CFL to 1 for constant coefficient case</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">alpha_; 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; wallValues_; 
+ 
+    </span><span class="s0">// setters not needed - from runtime parameters</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">set_to(</span><span class="s4">double </span><span class="s1">to){to_ = to;}; 
+    </span><span class="s4">void </span><span class="s1">set_tf(</span><span class="s4">double </span><span class="s1">tf){tf_ = tf;}; 
+    </span><span class="s4">void </span><span class="s1">set_dt(); 
+    </span><span class="s4">void </span><span class="s1">set_dx(</span><span class="s4">double </span><span class="s1">dx){dx_ = dx;}; 
+    </span><span class="s4">void </span><span class="s1">set_xo(</span><span class="s4">double </span><span class="s1">xo){xo_ = xo;}; 
+    </span><span class="s4">void </span><span class="s1">set_xf(</span><span class="s4">double </span><span class="s1">xf){xf_ = xf;}; 
+    </span><span class="s4">void </span><span class="s1">set_nu(</span><span class="s4">double </span><span class="s1">nu){nu_ = nu;}; 
+    </span><span class="s4">void </span><span class="s1">set_safety_factor(</span><span class="s4">double </span><span class="s1">safety_factor){safetyFactor_ = safety_factor;}; 
+    </span><span class="s4">void </span><span class="s1">set_wall_boundary(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; wallVals); 
+    </span><span class="s4">void </span><span class="s1">set_CFL(); 
+    </span><span class="s4">void </span><span class="s1">set_CFL(</span><span class="s4">double </span><span class="s1">CFL) {CFL_ = CFL;}; 
+    </span><span class="s4">void </span><span class="s1">set_time_iterations(</span><span class="s4">unsigned int </span><span class="s1">time){time_iterations_ = time;}; 
+    </span><span class="s4">void </span><span class="s1">set_time_iterations(); 
+    </span><span class="s4">void </span><span class="s1">set_space_iterations(); </span><span class="s0">// inferred from CFD number</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">set_alpha(); 
+</span><span class="s4">private</span><span class="s1">: 
+ 
+}; 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Burger PDE runtime parameter handler 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+</span><span class="s4">class </span><span class="s1">RuntimeParametersBurger{ 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s0">// Read in parameters from input file</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">read_parameters_from_file(std::string&amp; runtime_args); 
+ 
+    </span><span class="s4">double </span><span class="s1">get_to(){</span><span class="s4">return </span><span class="s1">to_;}; 
+    </span><span class="s4">double </span><span class="s1">get_tf(){</span><span class="s4">return </span><span class="s1">tf_;}; 
+    </span><span class="s4">double </span><span class="s1">get_dx(){</span><span class="s4">return </span><span class="s1">dx_;}; 
+    </span><span class="s4">double </span><span class="s1">get_dt(){</span><span class="s4">return </span><span class="s1">dt_;}; 
+    </span><span class="s4">double </span><span class="s1">get_CFL(){</span><span class="s4">return </span><span class="s1">CFL_;}; 
+    </span><span class="s4">double </span><span class="s1">get_xo(){</span><span class="s4">return </span><span class="s1">xo_;}; 
+    </span><span class="s4">double </span><span class="s1">get_xf(){</span><span class="s4">return </span><span class="s1">xf_;}; 
+    </span><span class="s4">double </span><span class="s1">get_nu(){</span><span class="s4">return </span><span class="s1">nu_;}; 
+    </span><span class="s4">double </span><span class="s1">get_wall_value() {</span><span class="s4">return </span><span class="s1">wallVal_;}; 
+    </span><span class="s4">unsigned int </span><span class="s1">get_time_iterations(){</span><span class="s4">return </span><span class="s1">time_iterations_;}; 
+    </span><span class="s4">unsigned int </span><span class="s1">get_space_iterations(){</span><span class="s4">return </span><span class="s1">space_iterations_;}; 
+    </span><span class="s4">double </span><span class="s1">get_alpha(){</span><span class="s4">return </span><span class="s1">alpha_;}; 
+ 
+    </span><span class="s4">void </span><span class="s1">add_wall_value(</span><span class="s4">double </span><span class="s1">wallValue){wallValues_.push_back(wallValue);}; 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; get_wall_vals(){</span><span class="s4">return </span><span class="s1">wallValues_;}; 
+ 
+</span><span class="s4">protected</span><span class="s1">: 
+    </span><span class="s4">double </span><span class="s1">to_; 
+    </span><span class="s4">double </span><span class="s1">tf_; 
+    </span><span class="s4">double </span><span class="s1">dx_; 
+    </span><span class="s4">double </span><span class="s1">dt_; 
+    </span><span class="s4">double </span><span class="s1">CFL_; 
+    </span><span class="s4">double </span><span class="s1">xo_; 
+    </span><span class="s4">double </span><span class="s1">xf_; 
+    </span><span class="s4">double </span><span class="s1">wallVal_; 
+    </span><span class="s4">unsigned int </span><span class="s1">time_iterations_; 
+    </span><span class="s4">unsigned int </span><span class="s1">space_iterations_; 
+    </span><span class="s4">double </span><span class="s1">nu_; </span><span class="s0">// constant parameter for wave equation</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">safetyFactor_; </span><span class="s0">// Default:: force CFL to 1 for constant coefficient case</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">alpha_; 
+    </span><span class="s4">double </span><span class="s1">cmax_; 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; wallValues_; 
+ 
+    </span><span class="s0">// setters not needed - from runtime parameters</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">set_to(</span><span class="s4">double </span><span class="s1">to){to_ = to;}; 
+    </span><span class="s4">void </span><span class="s1">set_tf(</span><span class="s4">double </span><span class="s1">tf){tf_ = tf;}; 
+    </span><span class="s4">void </span><span class="s1">set_dt(); 
+    </span><span class="s4">void </span><span class="s1">set_dx(</span><span class="s4">double </span><span class="s1">dx){dx_ = dx;}; 
+    </span><span class="s4">void </span><span class="s1">set_xo(</span><span class="s4">double </span><span class="s1">xo){xo_ = xo;}; 
+    </span><span class="s4">void </span><span class="s1">set_xf(</span><span class="s4">double </span><span class="s1">xf){xf_ = xf;}; 
+    </span><span class="s4">void </span><span class="s1">set_nu(</span><span class="s4">double </span><span class="s1">nu){nu_ = nu;}; 
+    </span><span class="s4">void </span><span class="s1">set_safety_factor(</span><span class="s4">double </span><span class="s1">safety_factor){safetyFactor_ = safety_factor;}; 
+    </span><span class="s4">void </span><span class="s1">set_wall_boundary(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; wallVals); 
+    </span><span class="s4">void </span><span class="s1">set_CFL(); 
+    </span><span class="s4">void </span><span class="s1">set_CFL(</span><span class="s4">double </span><span class="s1">CFL) {CFL_ = CFL;}; 
+    </span><span class="s4">void </span><span class="s1">set_time_iterations(</span><span class="s4">unsigned int </span><span class="s1">time){time_iterations_ = time;}; 
+    </span><span class="s4">void </span><span class="s1">set_time_iterations(); 
+    </span><span class="s4">void </span><span class="s1">set_space_iterations(); </span><span class="s0">// inferred from CFD number</span><span class="s1"> 
+    </span><span class="s4">void </span><span class="s1">set_alpha(); 
+    </span><span class="s4">void </span><span class="s1">set_cmax(</span><span class="s4">double </span><span class="s1">c){cmax_ = c;}; 
+</span><span class="s4">private</span><span class="s1">: 
+ 
+}; 
+ 
+</span><span class="s2">#endif </span><span class="s0">//CFD_HW_RUNTIMEPARAMETERS_H</span><span class="s1"> 
+</span></pre>
+</body>
+</html>

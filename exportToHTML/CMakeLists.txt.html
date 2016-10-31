@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>CMakeLists.txt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,0); }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+CMakeLists.txt</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">cmake_minimum_required</span><span class="s1">(</span><span class="s2">VERSION 3.6</span><span class="s1">) 
+</span><span class="s0">project</span><span class="s1">(</span><span class="s2">CFD_HW</span><span class="s1">) 
+ 
+</span><span class="s0">set</span><span class="s1">(</span><span class="s2">CMAKE_CXX_FLAGS </span><span class="s1">&quot;</span><span class="s2">${CMAKE_CXX_FLAGS} -std=c++11</span><span class="s1">&quot;) 
+ 
+</span><span class="s0">set</span><span class="s1">(</span><span class="s2">SOURCE_FILES main.cpp BoundaryCond.cpp BoundaryCond.h IntCond.cpp IntCond.h RuntimeParameters.cpp RuntimeParameters.h RuntimeJoke.cpp RuntimeJoke.h SolutionProcedure.cpp SolutionProcedure.h</span><span class="s1">) 
+</span><span class="s0">add_executable</span><span class="s1">(</span><span class="s2">CFD_HW ${SOURCE_FILES}</span><span class="s1">)</span></pre>
+</body>
+</html>

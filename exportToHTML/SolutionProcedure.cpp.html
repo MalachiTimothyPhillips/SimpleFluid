@@ -1,0 +1,640 @@
+<html>
+<head>
+<title>SolutionProcedure.cpp</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,0); }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,128); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+SolutionProcedure.cpp</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//</span><span class="s1"> 
+</span><span class="s0">// Created by Malachi Phillips on 9/30/16.</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+ 
+</span><span class="s2">#include</span><span class="s3"> &quot;SolutionProcedure.h&quot;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &lt;fstream&gt;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &lt;sstream&gt;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &lt;iostream&gt;</span><span class="s1"> 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Factory function for solution procedures -- handles which equation to solve! 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &amp;equationType){ 
+    </span><span class="s0">// From string, return correct solver equation</span><span class="s1"> 
+    </span><span class="s4">if </span><span class="s1">(equationType == </span><span class="s3">&quot;LinearWaveEquation&quot;</span><span class="s1">){ 
+        </span><span class="s4">return new </span><span class="s1">SolutionProcedureLinWave; 
+    } 
+    </span><span class="s4">if </span><span class="s1">(equationType == </span><span class="s3">&quot;InviscidBurger&quot;</span><span class="s1">){ 
+        </span><span class="s4">return new </span><span class="s1">SolutionProcedureInviscid; 
+    } 
+    </span><span class="s4">if </span><span class="s1">(equationType == </span><span class="s3">&quot;Burger&quot;</span><span class="s1">){ 
+        </span><span class="s4">return new </span><span class="s1">SolutionProcedureBurger; 
+    } 
+    </span><span class="s4">if </span><span class="s1">(equationType == </span><span class="s3">&quot;DiffusionEquation&quot;</span><span class="s1">) { 
+        </span><span class="s4">return new </span><span class="s1">SolutionProcedureDiffusion; 
+    } 
+    </span><span class="s4">else</span><span class="s1">{ 
+        std::cout &lt;&lt; </span><span class="s3">&quot;Error: could not correctly find your PDE equation to solve!&quot; </span><span class="s1">&lt;&lt; std::endl; 
+        </span><span class="s0">// TODO: throw some error here that prevents user from continuing</span><span class="s1"> 
+    } 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Solution procedure for linear wave equation 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name ){ 
+ 
+    </span><span class="s0">// Since type is already known, just hard code in the file reader</span><span class="s1"> 
+    runtime_param_ = </span><span class="s4">new </span><span class="s1">RuntimeParametersLinWave; 
+ 
+    runtime_param_-&gt;read_parameters_from_file(runtime_params); 
+ 
+    </span><span class="s0">// Will take from input user to set boundary/initial condition type</span><span class="s1"> 
+    </span><span class="s0">// Fow now, hard code it</span><span class="s1"> 
+ 
+    set_boundary(); 
+    set_init_cond(); 
+ 
+    </span><span class="s0">// Set size of uSolutions_ vector</span><span class="s1"> 
+    uSolutions_.resize(runtime_param_-&gt;get_space_iterations()); 
+ 
+    </span><span class="s0">// Apply boundary condition, LHSWall</span><span class="s1"> 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// For first step, need to apply the initial condition</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+    solutionInitialCondition_-&gt;apply_initial_cond(uSolutions_, dx, xo); 
+ 
+    </span><span class="s0">// execute procedure</span><span class="s1"> 
+    procedure(template_file_name); 
+ 
+    </span><span class="s0">// end procedure</span><span class="s1"> 
+    end_procedure(); 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos){ 
+ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+ 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::write_to_file() 
+{ 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::procedure(std::string&amp; template_file_name){ 
+ 
+    </span><span class="s0">// write first point -- initial condition onto file</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">to = runtime_param_-&gt;get_to(); 
+    std::ofstream outFile (template_file_name + </span><span class="s3">&quot;0&quot;</span><span class="s1">); 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">pos; 
+        convert_idx_to_pos(i,pos); 
+        outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+        outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+    } </span><span class="s0">// writes file in two column format: x and u(x)</span><span class="s1"> 
+    outFile.close(); 
+ 
+ 
+    </span><span class="s0">// Apply step at every time step</span><span class="s1"> 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">t = </span><span class="s5">1</span><span class="s1">; t &lt; runtime_param_-&gt;get_time_iterations(); ++t){ 
+        apply_step(); 
+ 
+        </span><span class="s0">// write results to output file, need t's, x's, and u's</span><span class="s1"> 
+        outFile.open(template_file_name + std::to_string(t)); 
+        </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+            </span><span class="s4">double </span><span class="s1">pos; 
+            convert_idx_to_pos(i,pos); 
+            outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+            outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+            </span><span class="s0">// close file when done</span><span class="s1"> 
+        } 
+        outFile.close(); 
+ 
+    } 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::end_procedure(){ 
+    </span><span class="s0">// something important to finish writing the output file</span><span class="s1"> 
+    std::cout &lt;&lt; </span><span class="s3">&quot;Done.&quot; </span><span class="s1">&lt;&lt; std::endl; 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::apply_step(){ 
+ 
+    </span><span class="s0">// Apply individual step to solutions</span><span class="s1"> 
+ 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// loops over entries, save the one involved in the boundary condition</span><span class="s1"> 
+    </span><span class="s0">// boundary hard coded to LHS of wall</span><span class="s1"> 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1</span><span class="s1">; i &lt; runtime_param_-&gt;get_space_iterations(); i++){ 
+        </span><span class="s0">// foward in time, backward in space</span><span class="s1"> 
+        uSolutions_[i] = uSolutions_[i] - runtime_param_-&gt;get_CFL()*(uSolutions_[i] - uSolutions_[i-</span><span class="s5">1</span><span class="s1">]); 
+    } 
+ 
+    </span><span class="s0">// Need to write out solutions, but for now, leave that out</span><span class="s1"> 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::set_boundary(){ 
+ 
+    </span><span class="s0">// hard code as LHSWall</span><span class="s1"> 
+    </span><span class="s0">//std::string&amp; myString;</span><span class="s1"> 
+    </span><span class="s0">//solutionBoundaryCondition_ = BoundaryCondition::make_boundary_condition(myString);</span><span class="s1"> 
+    solutionBoundaryCondition_ = </span><span class="s4">new </span><span class="s1">LHSWall; 
+ 
+ 
+    </span><span class="s0">//TODO: should probably allow the user to go ahead and set what boundary condition to be used</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureLinWave::set_init_cond(){ 
+ 
+    </span><span class="s0">// hard code as wave type</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = BoundaryCondition::make_init_cond();</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = new StepWave;</span><span class="s1"> 
+    solutionInitialCondition_ = </span><span class="s4">new </span><span class="s1">SinWave; 
+ 
+    </span><span class="s0">// TODO: should probably allow the user to go ahead and set the initial condition from the control file</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Solution procedure for the diffusion equation 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name ){ 
+ 
+    </span><span class="s0">// Type is known, go ahead and force it</span><span class="s1"> 
+    runtime_param_ = </span><span class="s4">new </span><span class="s1">RuntimeParametersDiffusion; 
+    </span><span class="s0">// Take from file to set parameters</span><span class="s1"> 
+    runtime_param_-&gt;read_parameters_from_file(runtime_params); 
+ 
+    </span><span class="s0">// Will take from input user to set boundary/initial condition type</span><span class="s1"> 
+    </span><span class="s0">// Fow now, hard code it</span><span class="s1"> 
+ 
+    set_boundary(); 
+    set_init_cond(); 
+ 
+    </span><span class="s0">// Set size of uSolutions_ vector</span><span class="s1"> 
+    uSolutions_.resize(runtime_param_-&gt;get_space_iterations()); 
+ 
+    </span><span class="s0">// Apply boundary condition, LHSWall</span><span class="s1"> 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// For first step, need to apply the initial condition</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+    solutionInitialCondition_-&gt;apply_initial_cond(uSolutions_, dx, xo); 
+ 
+    </span><span class="s0">// execute procedure</span><span class="s1"> 
+    procedure(template_file_name); 
+ 
+    </span><span class="s0">// end procedure</span><span class="s1"> 
+    end_procedure(); 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos){ 
+ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+ 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::write_to_file() 
+{ 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::procedure(std::string&amp; template_file_name){ 
+ 
+    </span><span class="s0">// write first point -- initial condition onto file</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">to = runtime_param_-&gt;get_to(); 
+    std::ofstream outFile (template_file_name + </span><span class="s3">&quot;0&quot;</span><span class="s1">); 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">pos; 
+        convert_idx_to_pos(i,pos); 
+        outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+        outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+    } </span><span class="s0">// writes file in two column format: x and u(x)</span><span class="s1"> 
+    outFile.close(); 
+ 
+    </span><span class="s0">// Apply step at every time step</span><span class="s1"> 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">t = </span><span class="s5">1</span><span class="s1">; t &lt; runtime_param_-&gt;get_time_iterations(); ++t){ 
+        apply_step(); 
+ 
+        </span><span class="s0">// write results to output file, need t's, x's, and u's</span><span class="s1"> 
+        outFile.open(template_file_name + std::to_string(t)); 
+        </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+            </span><span class="s4">double </span><span class="s1">pos; 
+            convert_idx_to_pos(i,pos); 
+            outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+            outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+            </span><span class="s0">// close file when done</span><span class="s1"> 
+        } 
+        outFile.close(); 
+ 
+    } 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::end_procedure(){ 
+    </span><span class="s0">// something important to finish writing the output file</span><span class="s1"> 
+    std::cout &lt;&lt; </span><span class="s3">&quot;Done.&quot; </span><span class="s1">&lt;&lt; std::endl; 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::apply_step(){ 
+ 
+    </span><span class="s0">// Apply individual step to solutions</span><span class="s1"> 
+ 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues = runtime_param_-&gt;get_wall_vals(); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// loops over entries, save the one involved in the boundary condition</span><span class="s1"> 
+    </span><span class="s0">// boundary hard coded to LHS of wall</span><span class="s1"> 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1</span><span class="s1">; i &lt; runtime_param_-&gt;get_space_iterations()-</span><span class="s5">1</span><span class="s1">; i++){ </span><span class="s0">// ensure it won't go too far</span><span class="s1"> 
+        </span><span class="s0">// foward in time, central in space</span><span class="s1"> 
+        uSolutions_[i] = (</span><span class="s5">1.0 </span><span class="s1">- </span><span class="s5">2.0 </span><span class="s1">* runtime_param_-&gt;get_alpha()) * uSolutions_[i] + 
+                         runtime_param_-&gt;get_alpha() * (uSolutions_[i+</span><span class="s5">1</span><span class="s1">] + uSolutions_[i-</span><span class="s5">1</span><span class="s1">]); 
+        </span><span class="s0">// values at end points are handled by the specified boundary conditions</span><span class="s1"> 
+    } 
+ 
+    </span><span class="s0">// Need to write out solutions, but for now, leave that out</span><span class="s1"> 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::set_boundary(){ 
+ 
+    </span><span class="s0">// hard code as LHSWall</span><span class="s1"> 
+    </span><span class="s0">//std::string&amp; myString;</span><span class="s1"> 
+    </span><span class="s0">//solutionBoundaryCondition_ = BoundaryCondition::make_boundary_condition(myString);</span><span class="s1"> 
+    solutionBoundaryCondition_ = </span><span class="s4">new </span><span class="s1">TwoWall; 
+ 
+ 
+    </span><span class="s0">//TODO: should probably allow the user to go ahead and set what boundary condition to be used</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureDiffusion::set_init_cond(){ 
+ 
+    </span><span class="s0">// hard code as wave type</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = BoundaryCondition::make_init_cond();</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = new StepWave;</span><span class="s1"> 
+    solutionInitialCondition_ = </span><span class="s4">new </span><span class="s1">SinWave; 
+ 
+    </span><span class="s0">// TODO: should probably allow the user to go ahead and set the initial condition from the control file</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Solution procedure for inviscid burger equation 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name ){ 
+ 
+    </span><span class="s0">// Since type is already known, just hard code in the file reader</span><span class="s1"> 
+    runtime_param_ = </span><span class="s4">new </span><span class="s1">RuntimeParametersLinWave; 
+ 
+    runtime_param_-&gt;read_parameters_from_file(runtime_params); 
+ 
+    </span><span class="s0">// Will take from input user to set boundary/initial condition type</span><span class="s1"> 
+    </span><span class="s0">// Fow now, hard code it</span><span class="s1"> 
+ 
+    set_boundary(); 
+    set_init_cond(); 
+ 
+    </span><span class="s0">// Set size of uSolutions_ vector</span><span class="s1"> 
+    uSolutions_.resize(runtime_param_-&gt;get_space_iterations()); 
+ 
+    </span><span class="s0">// Apply boundary condition, LHSWall</span><span class="s1"> 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// For first step, need to apply the initial condition</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+    solutionInitialCondition_-&gt;apply_initial_cond(uSolutions_, dx, xo); 
+ 
+    </span><span class="s0">// execute procedure</span><span class="s1"> 
+    procedure(template_file_name); 
+ 
+    </span><span class="s0">// end procedure</span><span class="s1"> 
+    end_procedure(); 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos){ 
+ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+ 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::write_to_file() 
+{ 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::procedure(std::string&amp; template_file_name){ 
+ 
+    </span><span class="s0">// write first point -- initial condition onto file</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">to = runtime_param_-&gt;get_to(); 
+    std::ofstream outFile (template_file_name + </span><span class="s3">&quot;0&quot;</span><span class="s1">); 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">pos; 
+        convert_idx_to_pos(i,pos); 
+        outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+        outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+    } </span><span class="s0">// writes file in two column format: x and u(x)</span><span class="s1"> 
+    outFile.close(); 
+ 
+ 
+    </span><span class="s0">// Apply step at every time step</span><span class="s1"> 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">t = </span><span class="s5">1</span><span class="s1">; t &lt; runtime_param_-&gt;get_time_iterations(); ++t){ 
+        apply_step(); 
+ 
+        </span><span class="s0">// write results to output file, need t's, x's, and u's</span><span class="s1"> 
+        outFile.open(template_file_name + std::to_string(t)); 
+        </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+            </span><span class="s4">double </span><span class="s1">pos; 
+            convert_idx_to_pos(i,pos); 
+            outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+            outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+            </span><span class="s0">// close file when done</span><span class="s1"> 
+        } 
+        outFile.close(); 
+ 
+    } 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::end_procedure(){ 
+    </span><span class="s0">// something important to finish writing the output file</span><span class="s1"> 
+    std::cout &lt;&lt; </span><span class="s3">&quot;Done.&quot; </span><span class="s1">&lt;&lt; std::endl; 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::apply_step(){ 
+ 
+    </span><span class="s0">// Apply individual step to solutions</span><span class="s1"> 
+ 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// loops over entries, save the one involved in the boundary condition</span><span class="s1"> 
+    </span><span class="s0">// boundary hard coded to LHS of wall</span><span class="s1"> 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1</span><span class="s1">; i &lt; runtime_param_-&gt;get_space_iterations(); i++){ 
+        </span><span class="s0">// foward in time, backward in space</span><span class="s1"> 
+        </span><span class="s4">double </span><span class="s1">CFL = uSolutions_[i] * runtime_param_-&gt;get_dt() / runtime_param_-&gt;get_dx(); 
+        uSolutions_[i] = uSolutions_[i] - CFL *(uSolutions_[i] - uSolutions_[i-</span><span class="s5">1</span><span class="s1">]); 
+    } 
+ 
+    </span><span class="s0">// Need to write out solutions, but for now, leave that out</span><span class="s1"> 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::set_boundary(){ 
+ 
+    </span><span class="s0">// hard code as LHSWall</span><span class="s1"> 
+    </span><span class="s0">//std::string&amp; myString;</span><span class="s1"> 
+    </span><span class="s0">//solutionBoundaryCondition_ = BoundaryCondition::make_boundary_condition(myString);</span><span class="s1"> 
+    solutionBoundaryCondition_ = </span><span class="s4">new </span><span class="s1">LHSWall; 
+ 
+ 
+    </span><span class="s0">//TODO: should probably allow the user to go ahead and set what boundary condition to be used</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureInviscid::set_init_cond(){ 
+ 
+    </span><span class="s0">// hard code as wave type</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = BoundaryCondition::make_init_cond();</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = new StepWave;</span><span class="s1"> 
+    solutionInitialCondition_ = </span><span class="s4">new </span><span class="s1">PositiveWave; 
+ 
+    </span><span class="s0">// TODO: should probably allow the user to go ahead and set the initial condition from the control file</span><span class="s1"> 
+ 
+} 
+ 
+ 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s0">/* 
+ * Solution procedure for full burger equation 
+ */</span><span class="s1"> 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name ){ 
+ 
+    </span><span class="s0">// Since type is already known, just hard code in the file reader</span><span class="s1"> 
+    runtime_param_ = </span><span class="s4">new </span><span class="s1">RuntimeParametersBurger; 
+ 
+    runtime_param_-&gt;read_parameters_from_file(runtime_params); 
+ 
+    </span><span class="s0">// Will take from input user to set boundary/initial condition type</span><span class="s1"> 
+    </span><span class="s0">// Fow now, hard code it</span><span class="s1"> 
+ 
+    set_boundary(); 
+    set_init_cond(); 
+ 
+    </span><span class="s0">// Set size of uSolutions_ vector</span><span class="s1"> 
+    uSolutions_.resize(runtime_param_-&gt;get_space_iterations()); 
+ 
+    </span><span class="s0">// Apply boundary condition, LHSWall</span><span class="s1"> 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// For first step, need to apply the initial condition</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+    solutionInitialCondition_-&gt;apply_initial_cond(uSolutions_, dx, xo); 
+ 
+    </span><span class="s0">// execute procedure</span><span class="s1"> 
+    procedure(template_file_name); 
+ 
+    </span><span class="s0">// end procedure</span><span class="s1"> 
+    end_procedure(); 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos){ 
+ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">dx = runtime_param_-&gt;get_dx(); 
+    </span><span class="s4">double </span><span class="s1">xo = runtime_param_-&gt;get_xo(); 
+ 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::write_to_file() 
+{ 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::procedure(std::string&amp; template_file_name){ 
+ 
+    </span><span class="s0">// write first point -- initial condition onto file</span><span class="s1"> 
+    </span><span class="s4">double </span><span class="s1">to = runtime_param_-&gt;get_to(); 
+    std::ofstream outFile (template_file_name + </span><span class="s3">&quot;0&quot;</span><span class="s1">); 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">pos; 
+        convert_idx_to_pos(i,pos); 
+        outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+        outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+    } </span><span class="s0">// writes file in two column format: x and u(x)</span><span class="s1"> 
+    outFile.close(); 
+ 
+ 
+    </span><span class="s0">// Apply step at every time step</span><span class="s1"> 
+    </span><span class="s4">for</span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">t = </span><span class="s5">1</span><span class="s1">; t &lt; runtime_param_-&gt;get_time_iterations(); ++t){ 
+        apply_step(); 
+ 
+        </span><span class="s0">// write results to output file, need t's, x's, and u's</span><span class="s1"> 
+        outFile.open(template_file_name + std::to_string(t)); 
+        </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">0 </span><span class="s1">; i &lt; uSolutions_.size(); ++i){ 
+            </span><span class="s4">double </span><span class="s1">pos; 
+            convert_idx_to_pos(i,pos); 
+            outFile &lt;&lt; pos &lt;&lt; </span><span class="s3">&quot; &quot;</span><span class="s1">; 
+            outFile &lt;&lt; uSolutions_[i] &lt;&lt; std::endl; 
+            </span><span class="s0">// close file when done</span><span class="s1"> 
+        } 
+        outFile.close(); 
+ 
+    } 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::end_procedure(){ 
+    </span><span class="s0">// something important to finish writing the output file</span><span class="s1"> 
+    std::cout &lt;&lt; </span><span class="s3">&quot;Done.&quot; </span><span class="s1">&lt;&lt; std::endl; 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::apply_step(){ 
+ 
+    </span><span class="s0">// Apply individual step to solutions</span><span class="s1"> 
+ 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; myWallValues; 
+    myWallValues.push_back(runtime_param_-&gt;get_wall_value()); 
+    solutionBoundaryCondition_-&gt;enforce_boundary_conditions(uSolutions_, myWallValues); 
+ 
+    </span><span class="s0">// loops over entries, save the one involved in the boundary condition</span><span class="s1"> 
+    </span><span class="s0">// boundary hard coded to LHS of wall</span><span class="s1"> 
+    uSolutions_[</span><span class="s5">0</span><span class="s1">] = </span><span class="s5">2.0</span><span class="s1">; 
+    uSolutions_[uSolutions_.size()-</span><span class="s5">1</span><span class="s1">] = </span><span class="s5">2.544</span><span class="s1">; 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1</span><span class="s1">; i &lt; runtime_param_-&gt;get_space_iterations()-</span><span class="s5">1</span><span class="s1">; i++){ 
+        </span><span class="s0">// foward in time, backward in space</span><span class="s1"> 
+        </span><span class="s4">double </span><span class="s1">CFL = uSolutions_[i] * runtime_param_-&gt;get_dt() / runtime_param_-&gt;get_dx(); 
+        </span><span class="s4">double </span><span class="s1">alpha = runtime_param_-&gt;get_alpha(); 
+ 
+        uSolutions_[i] = uSolutions_[i] - CFL *(uSolutions_[i] - uSolutions_[i-</span><span class="s5">1</span><span class="s1">]) + 
+                alpha * (uSolutions_[i+</span><span class="s5">1</span><span class="s1">] - </span><span class="s5">2 </span><span class="s1">* uSolutions_[i] + uSolutions_[i-</span><span class="s5">1</span><span class="s1">]); 
+    } 
+ 
+    </span><span class="s0">// Need to write out solutions, but for now, leave that out</span><span class="s1"> 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::set_boundary(){ 
+ 
+    </span><span class="s0">// hard code as LHSWall</span><span class="s1"> 
+    </span><span class="s0">//std::string&amp; myString;</span><span class="s1"> 
+    </span><span class="s0">//solutionBoundaryCondition_ = BoundaryCondition::make_boundary_condition(myString);</span><span class="s1"> 
+    solutionBoundaryCondition_ = </span><span class="s4">new </span><span class="s1">TwoWall; 
+ 
+ 
+    </span><span class="s0">//TODO: should probably allow the user to go ahead and set what boundary condition to be used</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s0">//============================================================================================================</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">SolutionProcedureBurger::set_init_cond(){ 
+ 
+    </span><span class="s0">// hard code as wave type</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = BoundaryCondition::make_init_cond();</span><span class="s1"> 
+    </span><span class="s0">//solutionInitialCondition_ = new StepWave;</span><span class="s1"> 
+    solutionInitialCondition_ = </span><span class="s4">new </span><span class="s1">PositiveWave; 
+ 
+    </span><span class="s0">// TODO: should probably allow the user to go ahead and set the initial condition from the control file</span><span class="s1"> 
+ 
+} 
+</span></pre>
+</body>
+</html>

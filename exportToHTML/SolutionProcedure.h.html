@@ -1,0 +1,145 @@
+<html>
+<head>
+<title>SolutionProcedure.h</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,0); }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,128); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+SolutionProcedure.h</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//</span><span class="s1"> 
+</span><span class="s0">// Created by Malachi Phillips on 9/30/16.</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+ 
+</span><span class="s2">#ifndef </span><span class="s1">CFD_HW_SOLUTIONPROCEDURE_H 
+</span><span class="s2">#define </span><span class="s1">CFD_HW_SOLUTIONPROCEDURE_H 
+ 
+</span><span class="s2">#include</span><span class="s3"> &lt;vector&gt;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &quot;RuntimeParameters.h&quot;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &quot;BoundaryCond.h&quot;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &quot;IntCond.h&quot;</span><span class="s1"> 
+ 
+</span><span class="s0">/* 
+ * Base class procedure 
+ */</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">SolutionProcedure{ 
+</span><span class="s4">public</span><span class="s1">: 
+ 
+    </span><span class="s4">static </span><span class="s1">SolutionProcedure* determine_solution_procedure(std::string&amp; equationType); 
+    </span><span class="s4">virtual void </span><span class="s1">apply_step() = </span><span class="s5">0</span><span class="s1">; 
+    </span><span class="s4">virtual void </span><span class="s1">end_procedure() = </span><span class="s5">0</span><span class="s1">; 
+    </span><span class="s4">virtual void </span><span class="s1">start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name) = </span><span class="s5">0</span><span class="s1">; 
+    </span><span class="s4">virtual void </span><span class="s1">procedure(std::string&amp; template_file_name) = </span><span class="s5">0</span><span class="s1">; 
+</span><span class="s4">protected</span><span class="s1">: 
+    std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt; uSolutions_; </span><span class="s0">// solutions vector, always exists</span><span class="s1"> 
+    BoundaryCondition* solutionBoundaryCondition_; 
+    InitCond* solutionInitialCondition_; 
+ 
+</span><span class="s0">//    RuntimeParameters* runtime_param_;</span><span class="s1"> 
+</span><span class="s0">// each one will have its own copy of its respective RuntimeParameters</span><span class="s1"> 
+ 
+    </span><span class="s4">virtual void </span><span class="s1">set_boundary() = </span><span class="s5">0</span><span class="s1">; 
+    </span><span class="s4">virtual void </span><span class="s1">set_init_cond() = </span><span class="s5">0</span><span class="s1">; 
+ 
+}; 
+ 
+ 
+ 
+</span><span class="s0">/* 
+ * Handle solution procedure for solving ut + cux = 0 
+ */</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">SolutionProcedureLinWave : </span><span class="s4">public </span><span class="s1">SolutionProcedure{ 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s4">void </span><span class="s1">apply_step(); 
+    </span><span class="s4">void </span><span class="s1">end_procedure(); 
+    </span><span class="s4">void </span><span class="s1">start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">procedure(std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos); 
+    </span><span class="s4">void </span><span class="s1">write_to_file(); 
+ 
+</span><span class="s4">protected</span><span class="s1">: 
+ 
+    RuntimeParametersLinWave* runtime_param_; 
+ 
+    </span><span class="s4">void </span><span class="s1">set_boundary(); 
+    </span><span class="s4">void </span><span class="s1">set_init_cond(); 
+ 
+</span><span class="s4">private</span><span class="s1">: 
+    </span><span class="s0">//~virtual SolutionProcedure(){};</span><span class="s1"> 
+}; 
+ 
+</span><span class="s0">/* 
+ * Handle solution procedure for solving ut = vuxx 
+ */</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">SolutionProcedureDiffusion : </span><span class="s4">public </span><span class="s1">SolutionProcedureLinWave{ 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s4">void </span><span class="s1">apply_step(); 
+    </span><span class="s4">void </span><span class="s1">end_procedure(); 
+    </span><span class="s4">void </span><span class="s1">start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">procedure(std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos); 
+    </span><span class="s4">void </span><span class="s1">write_to_file(); 
+</span><span class="s4">protected</span><span class="s1">: 
+ 
+    RuntimeParametersDiffusion* runtime_param_; 
+ 
+    </span><span class="s4">void </span><span class="s1">set_boundary(); 
+    </span><span class="s4">void </span><span class="s1">set_init_cond(); 
+}; 
+ 
+</span><span class="s0">/* 
+ * Handle solution procedure for solving ut + uux = 0 
+ * 
+ */</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">SolutionProcedureInviscid : </span><span class="s4">public </span><span class="s1">SolutionProcedureLinWave  { 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s4">void </span><span class="s1">apply_step(); 
+    </span><span class="s4">void </span><span class="s1">end_procedure(); 
+    </span><span class="s4">void </span><span class="s1">start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">procedure(std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos); 
+    </span><span class="s4">void </span><span class="s1">write_to_file(); 
+</span><span class="s4">protected</span><span class="s1">: 
+ 
+    RuntimeParametersLinWave* runtime_param_; 
+ 
+    </span><span class="s4">void </span><span class="s1">set_boundary(); 
+    </span><span class="s4">void </span><span class="s1">set_init_cond(); 
+}; 
+ 
+</span><span class="s0">/* 
+ * Handle solution procedure for solving ut + uux = vuxx 
+ * 
+ */</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">SolutionProcedureBurger : </span><span class="s4">public </span><span class="s1">SolutionProcedureLinWave  { 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s4">void </span><span class="s1">apply_step(); 
+    </span><span class="s4">void </span><span class="s1">end_procedure(); 
+    </span><span class="s4">void </span><span class="s1">start_procedure(std::string&amp; runtime_params, std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">procedure(std::string&amp; template_file_name); 
+    </span><span class="s4">void </span><span class="s1">convert_idx_to_pos(</span><span class="s4">unsigned int </span><span class="s1">idx, </span><span class="s4">double</span><span class="s1">&amp; pos); 
+    </span><span class="s4">void </span><span class="s1">write_to_file(); 
+</span><span class="s4">protected</span><span class="s1">: 
+ 
+    RuntimeParametersBurger* runtime_param_; 
+ 
+    </span><span class="s4">void </span><span class="s1">set_boundary(); 
+    </span><span class="s4">void </span><span class="s1">set_init_cond(); 
+}; 
+ 
+</span><span class="s2">#endif </span><span class="s0">//CFD_HW_SOLUTIONPROCEDURE_H</span><span class="s1"> 
+</span></pre>
+</body>
+</html>

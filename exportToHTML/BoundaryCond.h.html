@@ -1,0 +1,78 @@
+<html>
+<head>
+<title>BoundaryCond.h</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,0); }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,128); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+BoundaryCond.h</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//</span><span class="s1"> 
+</span><span class="s0">// Created by Malachi Phillips on 9/25/16.</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+ 
+</span><span class="s0">/* 
+ * Boundary Conditions 
+ */</span><span class="s1"> 
+ 
+</span><span class="s2">#ifndef </span><span class="s1">CFD_HW_BOUNDARYCOND_H 
+</span><span class="s2">#define </span><span class="s1">CFD_HW_BOUNDARYCOND_H 
+ 
+</span><span class="s2">#include</span><span class="s3"> &lt;string&gt;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &lt;vector&gt;</span><span class="s1"> 
+ 
+</span><span class="s0">// Base class</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">BoundaryCondition{ 
+</span><span class="s4">public</span><span class="s1">: 
+    </span><span class="s0">// Factory method -- pass string containing boundary information from run-time commands</span><span class="s1"> 
+    </span><span class="s4">static </span><span class="s1">BoundaryCondition *make_boundary_condition(std::string&amp; conditions); 
+    </span><span class="s4">virtual void </span><span class="s1">enforce_boundary_conditions(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; u_solutions, std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; wallValues) = </span><span class="s5">0</span><span class="s1">; </span><span class="s0">// pure virtual: requires definition</span><span class="s1"> 
+</span><span class="s4">protected</span><span class="s1">: 
+</span><span class="s4">private</span><span class="s1">: 
+    </span><span class="s0">//virtual ~BoundaryCondition(){};</span><span class="s1"> 
+}; 
+ 
+</span><span class="s0">// LHS Constant value wall boundary</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">LHSWall : </span><span class="s4">public </span><span class="s1">BoundaryCondition{ 
+</span><span class="s4">public</span><span class="s1">: 
+ 
+    </span><span class="s4">double </span><span class="s1">wallValue_ = </span><span class="s5">0.0</span><span class="s1">; 
+    </span><span class="s4">void </span><span class="s1">enforce_boundary_conditions(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; u_solutions, std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; wallValues); 
+ 
+</span><span class="s4">protected</span><span class="s1">: 
+ 
+</span><span class="s4">private</span><span class="s1">: 
+    </span><span class="s0">//virtual ~LHSWall(){};</span><span class="s1"> 
+ 
+}; 
+ 
+</span><span class="s0">// LHS/RHS constant wall value</span><span class="s1"> 
+</span><span class="s4">class </span><span class="s1">TwoWall : </span><span class="s4">public </span><span class="s1">BoundaryCondition{ 
+</span><span class="s4">public</span><span class="s1">: 
+ 
+    </span><span class="s4">double </span><span class="s1">LHSWallValue_ = </span><span class="s5">0.0</span><span class="s1">; 
+    </span><span class="s4">double </span><span class="s1">RHSWallValue_ = </span><span class="s5">0.0</span><span class="s1">; 
+    </span><span class="s4">void </span><span class="s1">enforce_boundary_conditions(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; u_solutions, std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; wallValues); 
+ 
+</span><span class="s4">protected</span><span class="s1">: 
+ 
+</span><span class="s4">private</span><span class="s1">: 
+    </span><span class="s0">//virtual ~LHSWall(){};</span><span class="s1"> 
+ 
+}; 
+</span><span class="s2">#endif </span><span class="s0">//CFD_HW_BOUNDARYCOND_H</span><span class="s1"> 
+</span></pre>
+</body>
+</html>

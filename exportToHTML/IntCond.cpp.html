@@ -1,0 +1,153 @@
+<html>
+<head>
+<title>IntCond.cpp</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(128,128,128); font-style: italic; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(128,128,0); }
+.s3 { color: rgb(0,128,0); font-weight: bold; }
+.s4 { color: rgb(0,0,128); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+IntCond.cpp</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">//</span><span class="s1"> 
+</span><span class="s0">// Created by Malachi Phillips on 9/25/16.</span><span class="s1"> 
+</span><span class="s0">//</span><span class="s1"> 
+ 
+</span><span class="s2">#include</span><span class="s3"> &quot;IntCond.h&quot;</span><span class="s1"> 
+</span><span class="s2">#include</span><span class="s3"> &lt;math.h&gt;</span><span class="s1"> 
+</span><span class="s0">////Factory</span><span class="s1"> 
+</span><span class="s0">//InitCond* InitCond::make_initial_condition()</span><span class="s1"> 
+</span><span class="s0">//{</span><span class="s1"> 
+</span><span class="s0">//    return new StepWave; //Hard code in single initial condition, for now</span><span class="s1"> 
+</span><span class="s0">//}</span><span class="s1"> 
+ 
+</span><span class="s0">// Essentially, what the user has to specify is the function</span><span class="s1"> 
+</span><span class="s4">void </span><span class="s1">StepWave::wave_func(</span><span class="s4">double </span><span class="s1">pos, </span><span class="s4">double</span><span class="s1">&amp; value){ 
+    </span><span class="s0">/* 
+     * u(x,o) = f(x) 
+     * Do:: from x = 1 to x = 3, u(x,o) = 3. Else, u(x,o) = 1 
+     * 
+     */</span><span class="s1"> 
+ 
+    </span><span class="s4">if </span><span class="s1">(pos &lt;= </span><span class="s5">3.0 </span><span class="s1">&amp;&amp; pos &gt;= </span><span class="s5">1.0</span><span class="s1">){ 
+        value = </span><span class="s5">3.0</span><span class="s1">; 
+    } 
+    </span><span class="s4">else</span><span class="s1">{ 
+        value = </span><span class="s5">1.0</span><span class="s1">; 
+    } 
+ 
+    </span><span class="s0">//TODO:: avoid conflicts with Boundary Condition</span><span class="s1"> 
+ 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">StepWave::convert_idx_to_position(</span><span class="s4">int </span><span class="s1">idx, </span><span class="s4">double </span><span class="s1">dx, </span><span class="s4">double </span><span class="s1">xo, </span><span class="s4">double</span><span class="s1">&amp; pos) 
+{ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">StepWave::apply_initial_cond(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; u_solutions, </span><span class="s4">double </span><span class="s1">dx, </span><span class="s4">double </span><span class="s1">xo){ 
+    </span><span class="s0">// u_solutions is already sized, so find number of points to apply from there</span><span class="s1"> 
+</span><span class="s0">//    double dx = runtime.get_dx();</span><span class="s1"> 
+</span><span class="s0">//    double xo = runtime.get_xo();</span><span class="s1"> 
+ 
+    </span><span class="s0">// Runtime parameters already set in SolutionProcedure</span><span class="s1"> 
+    </span><span class="s0">// Ensure no issues with boundary conditions, leave off first point</span><span class="s1"> 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1 </span><span class="s1">; i &lt; u_solutions.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">currentPos; 
+        convert_idx_to_position(i, dx, xo, currentPos); 
+        </span><span class="s0">// use current position to get function value</span><span class="s1"> 
+        </span><span class="s4">double </span><span class="s1">waveVal; 
+        wave_func(currentPos, waveVal); 
+        u_solutions[i] = waveVal; 
+    } 
+ 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">SinWave::apply_initial_cond(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; u_solutions, </span><span class="s4">double </span><span class="s1">dx, </span><span class="s4">double </span><span class="s1">xo){ 
+    </span><span class="s0">// u_solutions is already sized, so find number of points to apply from there</span><span class="s1"> 
+</span><span class="s0">//    double dx = runtime.get_dx();</span><span class="s1"> 
+</span><span class="s0">//    double xo = runtime.get_xo();</span><span class="s1"> 
+ 
+    </span><span class="s0">// Runtime parameters already set in SolutionProcedure</span><span class="s1"> 
+    </span><span class="s0">// Ensure no issues with boundary conditions, leave off first point</span><span class="s1"> 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1 </span><span class="s1">; i &lt; u_solutions.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">currentPos; 
+        convert_idx_to_position(i, dx, xo, currentPos); 
+        </span><span class="s0">// use current position to get function value</span><span class="s1"> 
+        </span><span class="s4">double </span><span class="s1">waveVal; 
+        sin_func(currentPos, waveVal); 
+        u_solutions[i] = waveVal; 
+    } 
+ 
+    </span><span class="s0">// TODO: basic form of this is shared. Perhaps template this class?</span><span class="s1"> 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">SinWave::convert_idx_to_position(</span><span class="s4">int </span><span class="s1">idx, </span><span class="s4">double </span><span class="s1">dx, </span><span class="s4">double </span><span class="s1">xo, </span><span class="s4">double</span><span class="s1">&amp; pos) 
+{ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+ 
+    </span><span class="s0">// TODO: shared between both, should probably tuck away in the base class for now</span><span class="s1"> 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">SinWave::sin_func(</span><span class="s4">double </span><span class="s1">pos, </span><span class="s4">double </span><span class="s1">&amp;value) { 
+ 
+    </span><span class="s0">/* 
+     * u(x,0) = f(x) 
+     * f(x) = 10sin(0.1x) //radian mode 
+     * 
+     */</span><span class="s1"> 
+ 
+    value = sin(</span><span class="s5">0.1 </span><span class="s1">* pos) * </span><span class="s5">10.0</span><span class="s1">; 
+ 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">PositiveWave::convert_idx_to_position(</span><span class="s4">int </span><span class="s1">idx, </span><span class="s4">double </span><span class="s1">dx, </span><span class="s4">double </span><span class="s1">xo, </span><span class="s4">double</span><span class="s1">&amp; pos) 
+{ 
+    </span><span class="s0">// Convert from index to position</span><span class="s1"> 
+    </span><span class="s0">// idx * dx + xo = current position</span><span class="s1"> 
+    pos = (</span><span class="s4">double</span><span class="s1">)(idx) * dx + xo; 
+ 
+    </span><span class="s0">// TODO: shared between both, should probably tuck away in the base class for now</span><span class="s1"> 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">PositiveWave::pos_func(</span><span class="s4">double </span><span class="s1">pos, </span><span class="s4">double</span><span class="s1">&amp; wave_func){ 
+    wave_func = </span><span class="s5">2. </span><span class="s1">- sin(</span><span class="s5">0.1 </span><span class="s1">* pos); 
+} 
+ 
+</span><span class="s4">void </span><span class="s1">PositiveWave::apply_initial_cond(std::vector&lt;</span><span class="s4">double</span><span class="s1">&gt;&amp; u_solutions, </span><span class="s4">double </span><span class="s1">dx, </span><span class="s4">double </span><span class="s1">xo){ 
+    </span><span class="s0">// u_solutions is already sized, so find number of points to apply from there</span><span class="s1"> 
+</span><span class="s0">//    double dx = runtime.get_dx();</span><span class="s1"> 
+</span><span class="s0">//    double xo = runtime.get_xo();</span><span class="s1"> 
+ 
+    </span><span class="s0">// Runtime parameters already set in SolutionProcedure</span><span class="s1"> 
+    </span><span class="s0">// Ensure no issues with boundary conditions, leave off first point</span><span class="s1"> 
+    </span><span class="s4">for </span><span class="s1">(</span><span class="s4">unsigned int </span><span class="s1">i = </span><span class="s5">1 </span><span class="s1">; i &lt; u_solutions.size(); ++i){ 
+        </span><span class="s4">double </span><span class="s1">currentPos; 
+        convert_idx_to_position(i, dx, xo, currentPos); 
+        </span><span class="s0">// use current position to get function value</span><span class="s1"> 
+        </span><span class="s4">double </span><span class="s1">waveVal; 
+        pos_func(currentPos, waveVal); 
+        u_solutions[i] = waveVal; 
+    } 
+ 
+    </span><span class="s0">// TODO: basic form of this is shared. Perhaps template this class?</span><span class="s1"> 
+} 
+ 
+ 
+</span></pre>
+</body>
+</html>
