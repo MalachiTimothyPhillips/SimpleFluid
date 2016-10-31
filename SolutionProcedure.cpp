@@ -18,6 +18,9 @@ SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &
     if (equationType == "LinearWaveEquation"){
         return new SolutionProcedureLinWave;
     }
+    if (equationType == "FixedLinearWaveEquation"){
+        return new SolutionProcedureFixLinWave;
+    }
     if (equationType == "InviscidBurger"){
         return new SolutionProcedureInviscid;
     }
@@ -167,6 +170,149 @@ void SolutionProcedureLinWave::set_boundary(){
 
 //============================================================================================================
 void SolutionProcedureLinWave::set_init_cond(){
+
+    // hard code as wave type
+    //solutionInitialCondition_ = BoundaryCondition::make_init_cond();
+    //solutionInitialCondition_ = new StepWave;
+    solutionInitialCondition_ = new SinWave;
+
+    // TODO: should probably allow the user to go ahead and set the initial condition from the control file
+
+}
+
+//============================================================================================================
+/*
+ * Solution procedure for linear wave equation, where c may be positive or negative
+ */
+//============================================================================================================
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::start_procedure(std::string& runtime_params, std::string& template_file_name ){
+
+    // Since type is already known, just hard code in the file reader
+    runtime_param_ = new RuntimeParametersLinWave;
+
+    runtime_param_->read_parameters_from_file(runtime_params);
+
+    // Will take from input user to set boundary/initial condition type
+    // Fow now, hard code it
+
+    set_boundary();
+    set_init_cond();
+
+    // Set size of uSolutions_ vector
+    uSolutions_.resize(runtime_param_->get_space_iterations());
+
+    // Apply boundary condition, LHSWall
+    std::vector<double> myWallValues;
+    myWallValues.push_back(runtime_param_->get_wall_value());
+    solutionBoundaryCondition_->enforce_boundary_conditions(uSolutions_, myWallValues);
+
+    // For first step, need to apply the initial condition
+    double dx = runtime_param_->get_dx();
+    double xo = runtime_param_->get_xo();
+    solutionInitialCondition_->apply_initial_cond(uSolutions_, dx, xo);
+
+    // execute procedure
+    procedure(template_file_name);
+
+    // end procedure
+    end_procedure();
+
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::convert_idx_to_pos(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dx = runtime_param_->get_dx();
+    double xo = runtime_param_->get_xo();
+
+    pos = (double)(idx) * dx + xo;
+
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::write_to_file()
+{
+
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::procedure(std::string& template_file_name){
+
+    // write first point -- initial condition onto file
+    double to = runtime_param_->get_to();
+    std::ofstream outFile (template_file_name + "0");
+    for(unsigned int i = 0 ; i < uSolutions_.size(); ++i){
+        double pos;
+        convert_idx_to_pos(i,pos);
+        outFile << pos << " ";
+        outFile << uSolutions_[i] << std::endl;
+    } // writes file in two column format: x and u(x)
+    outFile.close();
+
+
+    // Apply step at every time step
+    for(unsigned int t = 1; t < runtime_param_->get_time_iterations(); ++t){
+        apply_step();
+
+        // write results to output file, need t's, x's, and u's
+        outFile.open(template_file_name + std::to_string(t));
+        for (unsigned int i = 0 ; i < uSolutions_.size(); ++i){
+            double pos;
+            convert_idx_to_pos(i,pos);
+            outFile << pos << " ";
+            outFile << uSolutions_[i] << std::endl;
+            // close file when done
+        }
+        outFile.close();
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::end_procedure(){
+    // something important to finish writing the output file
+    std::cout << "Done." << std::endl;
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::apply_step(){
+
+    // Apply individual step to solutions
+
+    std::vector<double> myWallValues;
+    myWallValues.push_back(runtime_param_->get_wall_value());
+    solutionBoundaryCondition_->enforce_boundary_conditions(uSolutions_, myWallValues);
+
+    // loops over entries, save the one involved in the boundary condition
+    // boundary hard coded to LHS of wall
+    for (unsigned int i = 1; i < runtime_param_->get_space_iterations(); i++){
+        // foward in time, backward in space
+        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()*(uSolutions_[i] - uSolutions_[i-1]);
+    }
+
+    // Need to write out solutions, but for now, leave that out
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::set_boundary(){
+
+    // hard code as LHSWall
+    //std::string& myString;
+    //solutionBoundaryCondition_ = BoundaryCondition::make_boundary_condition(myString);
+    solutionBoundaryCondition_ = new LHSWall;
+
+
+    //TODO: should probably allow the user to go ahead and set what boundary condition to be used
+
+}
+
+//============================================================================================================
+void SolutionProcedureFixLinWave::set_init_cond(){
 
     // hard code as wave type
     //solutionInitialCondition_ = BoundaryCondition::make_init_cond();
