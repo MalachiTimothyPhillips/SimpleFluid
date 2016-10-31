@@ -5,4 +5,4 @@ Code is meant to be used for homework sets assigned in AME 5983 and programming 
 
 Refer to documentation for more details!
 
-  - Malachi
+  -- Malachi
