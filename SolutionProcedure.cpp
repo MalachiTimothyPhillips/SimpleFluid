@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cmath>
 
 //============================================================================================================
 /*
@@ -24,7 +25,7 @@ SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &
     if (equationType == "InviscidBurger"){
         return new SolutionProcedureInviscid;
     }
-    if (equationType == "Burger"){
+    if (equationType == "Burger"){ // I'm quite hungry now
         return new SolutionProcedureBurger;
     }
     if (equationType == "DiffusionEquation") {
@@ -305,7 +306,8 @@ void SolutionProcedureFixLinWave::apply_step(){
 
         // make sure to use u_(i-1) state at time n, not n+1, so have to save previous value
 
-        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()*(uSolutions_[i] - uSolnm1);
+        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()/2. * (uSolutions_[i+1] - uSolnm1)
+                + std::abs(runtime_param_->get_CFL()/2.) * (uSolutions_[i+1] - 2 * uSolutions_[i] + uSolnm1);
 
         // write new position, will be i-1 at next pass
         uSolnm1 = uSolutions_[i];
