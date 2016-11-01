@@ -147,9 +147,16 @@ void SolutionProcedureLinWave::apply_step(){
 
     // loops over entries, save the one involved in the boundary condition
     // boundary hard coded to LHS of wall
+
+    // need to save solution of u(i-1) at time n
+    double uSolnm1 = uSolutions_[0];
+
     for (unsigned int i = 1; i < runtime_param_->get_space_iterations(); i++){
         // foward in time, backward in space
-        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()*(uSolutions_[i] - uSolutions_[i-1]);
+        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()*(uSolutions_[i] - uSolnm1);
+
+        // update u(i-1) at time n as current value
+        uSolnm1 = uSolutions_[i];
     }
 
     // Need to write out solutions, but for now, leave that out
@@ -290,9 +297,18 @@ void SolutionProcedureFixLinWave::apply_step(){
 
     // loops over entries, save the one involved in the boundary condition
     // boundary hard coded to LHS of wall
+
+    double uSolnm1 = uSolutions_[0]; // Store solution of u_(i-1) at time n
+
     for (unsigned int i = 1; i < runtime_param_->get_space_iterations(); i++){
         // foward in time, backward in space
-        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()*(uSolutions_[i] - uSolutions_[i-1]);
+
+        // make sure to use u_(i-1) state at time n, not n+1, so have to save previous value
+
+        uSolutions_[i] = uSolutions_[i] - runtime_param_->get_CFL()*(uSolutions_[i] - uSolnm1);
+
+        // write new position, will be i-1 at next pass
+        uSolnm1 = uSolutions_[i];
     }
 
     // Need to write out solutions, but for now, leave that out
@@ -431,11 +447,18 @@ void SolutionProcedureDiffusion::apply_step(){
 
     // loops over entries, save the one involved in the boundary condition
     // boundary hard coded to LHS of wall
+
+    // need to store u_(i-1) at time n
+    double uSolnm1 = uSolutions_[0];
+
     for (unsigned int i = 1; i < runtime_param_->get_space_iterations()-1; i++){ // ensure it won't go too far
         // foward in time, central in space
         uSolutions_[i] = (1.0 - 2.0 * runtime_param_->get_alpha()) * uSolutions_[i] +
-                         runtime_param_->get_alpha() * (uSolutions_[i+1] + uSolutions_[i-1]);
+                         runtime_param_->get_alpha() * (uSolutions_[i+1] + uSolnm1);
         // values at end points are handled by the specified boundary conditions
+
+        // update previous state
+        uSolnm1 = uSolutions_[i];
     }
 
     // Need to write out solutions, but for now, leave that out
@@ -576,10 +599,16 @@ void SolutionProcedureInviscid::apply_step(){
 
     // loops over entries, save the one involved in the boundary condition
     // boundary hard coded to LHS of wall
+
+    // Record u(i-1) at time step n
+    double uSolnm1 = uSolutions_[0];
+
     for (unsigned int i = 1; i < runtime_param_->get_space_iterations(); i++){
         // foward in time, backward in space
         double CFL = uSolutions_[i] * runtime_param_->get_dt() / runtime_param_->get_dx();
-        uSolutions_[i] = uSolutions_[i] - CFL *(uSolutions_[i] - uSolutions_[i-1]);
+        uSolutions_[i] = uSolutions_[i] - CFL *(uSolutions_[i] - uSolnm1);
+
+        uSolnm1 = uSolutions_[i];
     }
 
     // Need to write out solutions, but for now, leave that out
@@ -723,14 +752,20 @@ void SolutionProcedureBurger::apply_step(){
     // loops over entries, save the one involved in the boundary condition
     // boundary hard coded to LHS of wall
     uSolutions_[0] = 2.0;
-    uSolutions_[uSolutions_.size()-1] = 2.544;
+    uSolutions_[uSolutions_.size()-1] = 2.544; // Need to remove hard code
+
+    // store u(i-1) at time step n
+    double uSolnm1 = uSolutions_[0];
+
     for (unsigned int i = 1; i < runtime_param_->get_space_iterations()-1; i++){
         // foward in time, backward in space
         double CFL = uSolutions_[i] * runtime_param_->get_dt() / runtime_param_->get_dx();
         double alpha = runtime_param_->get_alpha();
 
-        uSolutions_[i] = uSolutions_[i] - CFL *(uSolutions_[i] - uSolutions_[i-1]) +
-                alpha * (uSolutions_[i+1] - 2 * uSolutions_[i] + uSolutions_[i-1]);
+        uSolutions_[i] = uSolutions_[i] - CFL *(uSolutions_[i] - uSolnm1) +
+                alpha * (uSolutions_[i+1] - 2 * uSolutions_[i] + uSolnm1);
+
+        uSolnm1 = uSolutions_[i];
     }
 
     // Need to write out solutions, but for now, leave that out
