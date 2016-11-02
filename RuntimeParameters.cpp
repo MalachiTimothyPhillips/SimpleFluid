@@ -371,3 +371,82 @@ void RuntimeParametersBurger::set_wall_boundary(std::vector<double>& wallVals){
         wallValues_[i] = wallVals[i];
     }
 }
+
+//============================================================================================================
+/*
+ * Runtime parameter handler for multi dimensional advection equation
+ */
+//============================================================================================================
+
+//============================================================================================================
+void RuntimeParamMultiDim::read_parameters_from_file(std::string& runtime_file){
+
+    // Pass in order of:
+
+    /*
+     * L
+     * delta X
+     * H
+     * delta Y
+     * Tf
+     * delta T
+     * c
+     */
+
+    std::ifstream myInputFile;
+    myInputFile.open(runtime_file);
+    if (!myInputFile.is_open()){
+        std::cout << "Error: cannot open file " << runtime_file << std::endl;
+        std::cout << "Please ensure that the file name was properly entered.";
+        // should throw runtime error here
+    }
+    std::string currentLine;
+    std::vector<double> inputParameters;
+    // iterate over lines of file
+    while(std::getline(myInputFile,currentLine)){
+        // string to double conversion
+        double valueFromFile = std::stod(currentLine);
+
+        // write current value to holder
+        inputParameters.push_back(valueFromFile);
+    }
+
+    // Check that size of input parameters is correct -- 7
+    if (inputParameters.size() != 7){
+        std::cout << "Error: number of inputs in file " << runtime_file << " is not 7" << std::endl;
+        // should throw runtime error here
+    }
+
+    set_xo(0.0);
+    set_xf(inputParameters[0]);
+    set_iterations_x(static_cast<unsigned int>(inputParameters[1]));
+    set_yo(0.0);
+    set_yf(inputParameters[2]);
+    set_iterations_y(static_cast<unsigned int>(inputParameters[3]));
+    set_to(0.0);
+    set_tf(inputParameters[4]);
+    set_time_iterations(static_cast<unsigned int>(inputParameters[5]));
+    set_c(inputParameters[6]);
+
+    set_dx();
+    set_dy();
+    set_dt();
+
+}
+
+//============================================================================================================
+void RuntimeParamMultiDim::set_dx(){
+    double steps = static_cast<double>(iterations_x_);
+    dx_ = (xf_-xo_)/steps;
+}
+//============================================================================================================
+void RuntimeParamMultiDim::set_dy(){
+    double steps = static_cast<double>(iterations_y_);
+    dy_ = (yf_-yo_)/steps;
+}
+//============================================================================================================
+void RuntimeParamMultiDim::set_dt(){
+    double steps = static_cast<double>(time_iterations_);
+    dt_ = (tf_-to_)/time_iterations_;
+}
+

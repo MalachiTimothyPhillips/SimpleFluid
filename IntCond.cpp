@@ -126,4 +126,39 @@ void PositiveWave::apply_initial_cond(std::vector<double>& u_solutions, double d
     // TODO: basic form of this is shared. Perhaps template this class?
 }
 
+void Curvilinear::convert_idx_to_position(int idx, double dx, double xo, double& pos)
+{
+    // Convert from index to position
+    // idx * dx + xo = current position
+    pos = (double)(idx) * dx + xo;
 
+    // TODO: shared between both, should probably tuck away in the base class for now
+}
+
+void Curvilinear::pos_func(double x, double y, double& u){
+    u = x * x * cos(y) + sin(y);
+}
+
+void Curvilinear::apply_initial_cond(std::vector<std::vector<double>>& uSoln, RuntimeParamMultiDim& runtime){
+    double dx = runtime.get_dx();
+    double dy = runtime.get_dy();
+    double xo = runtime.get_xo();
+    double yo = runtime.get_yo();
+    unsigned int sizeX = runtime.get_x_iterations();
+    unsigned int sizeY = runtime.get_y_iterations();
+    for (unsigned int i = 0 ; i < sizeX; ++i){
+        for (unsigned int j = 0 ; j < sizeY; ++j){
+            double x_curr;
+            convert_idx_to_position(i, dx, xo, x_curr);
+            double y_curr;
+            convert_idx_to_position(j, dy, yo, y_curr);
+
+            double waveVal;
+            pos_func(x_curr, y_curr, waveVal);
+            uSoln[i][j] = waveVal;
+
+        }
+    }
+
+    // TODO: basic form of this is shared. Perhaps template this class?
+}

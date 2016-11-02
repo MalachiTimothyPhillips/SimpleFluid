@@ -172,6 +172,7 @@
           <root url="file:///System/Library/Frameworks/VideoToolbox.framework/Headers" />
           <root url="file:///System/Library/Frameworks/MediaLibrary.framework/Headers" />
           <root url="file:///usr/include" />
+          <root url="file:///usr/local/lib" />
           <root url="file:///usr/local/include" />
           <root url="file:///Library/Frameworks/OSXFUSE.framework/Headers" />
           <root url="file:///Library/Frameworks/CUDA.framework/Headers" />
@@ -338,6 +339,7 @@
           <root url="file:///System/Library/Frameworks/VideoToolbox.framework/Headers" />
           <root url="file:///System/Library/Frameworks/MediaLibrary.framework/Headers" />
           <root url="file:///usr/include" />
+          <root url="file:///usr/local/lib" />
           <root url="file:///usr/local/include" />
           <root url="file:///Library/Frameworks/OSXFUSE.framework/Headers" />
           <root url="file:///Library/Frameworks/CUDA.framework/Headers" />

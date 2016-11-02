@@ -9,6 +9,9 @@
 #include "RuntimeParameters.h"
 #include "BoundaryCond.h"
 #include "IntCond.h"
+#include <boost/multi_array.hpp>
+#include <cassert>
+
 
 /*
  * Base class procedure
@@ -23,13 +26,24 @@ public:
     virtual void start_procedure(std::string& runtime_params, std::string& template_file_name) = 0;
     virtual void procedure(std::string& template_file_name) = 0;
 protected:
-    std::vector<double> uSolutions_; // solutions vector, always exists
     BoundaryCondition* solutionBoundaryCondition_;
     InitCond* solutionInitialCondition_;
+
+    std::vector<double> uSolutions_;
 
     virtual void set_boundary() = 0;
     virtual void set_init_cond() = 0;
 
+};
+
+/*
+ * Derived class for 2D cases
+ */
+class MultiDimProcedure : public SolutionProcedure {
+protected:
+    std::vector<std::vector<double>> multiUSolutions_;
+    MultiDimensionBoundaryCondition* multiSolutionBoundaryCondition_;
+    MutliDimInitCond* multiSolutionInitialCondition_;
 };
 
 
@@ -141,5 +155,28 @@ protected:
     void set_boundary();
     void set_init_cond();
 };
+
+/*
+ * Solution procedure for 2D advection equation
+ */
+class SolutionProcedureMultiDimAdvection : public MultiDimProcedure  {
+public:
+    void apply_step();
+    void end_procedure();
+    void start_procedure(std::string& runtime_params, std::string& template_file_name);
+    void procedure(std::string& template_file_name);
+    void convert_idx_to_pos_x(unsigned int idx, double& pos);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+    void write_to_file();
+protected:
+
+    // Multi dimensional parameters
+    RuntimeParamMultiDim* runtime_args_;
+
+    void set_boundary();
+    void set_init_cond();
+
+};
+
 
 #endif //CFD_HW_SOLUTIONPROCEDURE_H

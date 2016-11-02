@@ -14,45 +14,6 @@
 #include <string>
 #include <vector>
 
-
-//============================================================================================================
-/*
- * Base class for run time parameters
- */
-//============================================================================================================
-//class RuntimeParameters{
-//public:
-//    static RuntimeParameters* create_runtime_param(std::string& whichPDE);
-//    unsigned int get_space_iterations(){return space_iterations_;};
-//    unsigned int get_time_iterations(){return time_iterations_;};
-//    double get_wall_value(){return wallValue_;};
-//    double get_xo(){return xo_;};
-//    double get_xf(){return xf_;};
-//    double get_dx(){return dx_;};
-//    double get_to(){return to_;};
-//    double get_CFL(){return CFL_;};
-//    double get_alpha(){return alpha_;};
-//    std::vector<double>& get_wall_vals(){return wallValues_;};
-//
-//    void read_parameters_from_file(std::string& runtime_args) = 0;
-//
-//protected:
-//
-//    unsigned int space_iterations_;
-//    unsigned int time_iterations_;
-//    double wallValue_;
-//    double xo_;
-//    double xf_;
-//    double dx_;
-//    double to_;
-//    double CFL_;
-//    double alpha_;
-//    std::vector<double> wallValues_;
-//    void set_space_iterations();
-//    void set_wall_value();
-//    void set_wall_boundary(std::vector<double>& wallVals);
-//};
-
 //============================================================================================================
 /*
  * Linear wave runtime parameter handler
@@ -238,5 +199,76 @@ protected:
 private:
 
 };
+
+//============================================================================================================
+/*
+ * Runtime Parameters for multi dimensional advection equation
+ */
+//============================================================================================================
+class RuntimeParamMultiDim{
+
+public:
+
+    // Read in parameters from input file
+    void read_parameters_from_file(std::string& runtime_args);
+
+    double get_to(){return to_;};
+    double get_tf(){return tf_;};
+    double get_dx(){return dx_;};
+    double get_dt(){return dt_;};
+    double get_CFL(){return CFL_;};
+    double get_xo(){return xo_;};
+    double get_xf(){return xf_;};
+    double get_yo(){return yo_;};
+    double get_yf(){return yf_;};
+    double get_dy(){return dy_;};
+    double get_c(){return c_;};
+    double get_wall_value() {return wallVal_;};
+    unsigned int get_time_iterations(){return time_iterations_;};
+    unsigned int get_x_iterations(){return iterations_x_;};
+    unsigned int get_y_iterations(){return iterations_y_;};
+
+protected:
+    double to_;
+    double tf_;
+    double dx_;
+    double dy_;
+    double dt_;
+    double CFL_;
+    double xo_;
+    double xf_;
+    double yo_;
+    double yf_;
+    double wallVal_;
+    unsigned int time_iterations_;
+    unsigned int iterations_x_;
+    unsigned int iterations_y_;
+    double c_; // constant parameter for wave equation
+    double safetyFactor_; // Default:: force CFL to 1 for constant coefficient case
+
+    // setters not needed - from runtime parameters
+    void set_to(double to){to_ = to;};
+    void set_tf(double tf){tf_ = tf;};
+    void set_dt();
+    void set_dx();
+    void set_dy();
+    void set_xo(double xo){xo_ = xo;};
+    void set_xf(double xf){xf_ = xf;};
+    void set_yo(double yo){yo_ = yo;};
+    void set_yf(double yf){yf_ = yf;};
+    void set_c(double c){c_ = c;};
+    void set_safety_factor(double safety_factor);
+    void set_wall_boundary(double wallVal){wallVal_ = wallVal;};
+    void set_CFL();
+    void set_CFL(double CFL) {CFL_ = CFL;};
+    void set_time_iterations(unsigned int timeIterations){ time_iterations_ = timeIterations;};
+    void set_iterations_x(unsigned int x){iterations_x_ = x;};
+    void set_iterations_y(unsigned int y){iterations_y_ = y;};
+
+private:
+
+};
+
+//TODO: Generalize file parser, feel free to use boost library
 
 #endif //CFD_HW_RUNTIMEPARAMETERS_H

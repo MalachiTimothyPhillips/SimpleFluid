@@ -31,6 +31,9 @@ SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &
     if (equationType == "DiffusionEquation") {
         return new SolutionProcedureDiffusion;
     }
+    if (equationType == "LinearAdvectionEquation"){
+        return new SolutionProcedureMultiDimAdvection;
+    }
     else{
         std::cout << "Error: could not correctly find your PDE equation to solve!" << std::endl;
         // TODO: throw some error here that prevents user from continuing
@@ -793,6 +796,191 @@ void SolutionProcedureBurger::set_init_cond(){
     //solutionInitialCondition_ = BoundaryCondition::make_init_cond();
     //solutionInitialCondition_ = new StepWave;
     solutionInitialCondition_ = new PositiveWave;
+
+    // TODO: should probably allow the user to go ahead and set the initial condition from the control file
+
+}
+
+//============================================================================================================
+/*
+ * Solution procedure for linear advection equation
+ */
+//============================================================================================================
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::start_procedure(std::string& runtime_params, std::string& template_file_name ){
+
+    // Since type is already known, just hard code in the file reader
+    runtime_args_ = new RuntimeParamMultiDim;
+
+    runtime_args_->read_parameters_from_file(runtime_params);
+
+    // Will take from input user to set boundary/initial condition type
+    // Fow now, hard code it
+
+    set_boundary();
+    set_init_cond();
+
+    // set size of vector
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // For first step, need to apply the initial condition
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+    multiSolutionInitialCondition_->apply_initial_cond(multiUSolutions_, *(runtime_args_));
+
+    // execute procedure
+    procedure(template_file_name);
+
+    // end procedure
+    end_procedure();
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::convert_idx_to_pos_x(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+
+    pos = (double)(idx) * dx + xo;
+
+}
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::convert_idx_to_pos_y(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dy = runtime_args_->get_dy();
+    double yo = runtime_args_->get_yo();
+
+    pos = (double)(idx) * dy + yo;
+
+}
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::write_to_file()
+{
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::procedure(std::string& template_file_name){
+
+    // write first point -- initial condition onto file
+    double to = runtime_args_->get_to();
+    std::ofstream outFile (template_file_name + "0");
+
+    // Needed nested for loops
+    for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            //write to file (x,y) pair, with u(x,y) at current time step
+            double posx;
+            convert_idx_to_pos_x(i, posx);
+            double posy;
+            convert_idx_to_pos_y(j, posy);
+            outFile << posx << "     ";
+            outFile << posy << "     ";
+            outFile << multiUSolutions_[i][j] << std::endl;
+        }
+    }
+
+    outFile.close();
+
+
+    // Apply step at every time step
+    for(unsigned int t = 1; t < runtime_args_->get_time_iterations(); ++t){
+        apply_step();
+
+        // write results to output file, need x's, y's, and t's
+        outFile.open(template_file_name + std::to_string(t));
+
+        // I hate the idea of a triply nested for loop, but this just prints out data
+        for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+            for (unsigned int  j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+                //write to file (x,y) pair, with u(x,y) at current time step
+                double posx;
+                convert_idx_to_pos_x(i,posx);
+                double posy;
+                convert_idx_to_pos_y(j,posy);
+                outFile << posx << "     ";
+                outFile << posy << "     ";
+                outFile << multiUSolutions_[i][j] << std::endl;
+            }
+        }
+
+        outFile.close();
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::end_procedure(){
+    // something important to finish writing the output file
+    std::cout << "Done." << std::endl;
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::apply_step(){
+
+    // Apply individual step to solutions
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // loops over entries, save the one involved in the boundary condition
+    // boundary hard coded to LHS of wall
+
+
+    double c = runtime_args_->get_c();
+    double dx = runtime_args_->get_dx();
+    double dy = runtime_args_->get_dy();
+    double dt = runtime_args_->get_dt();
+    // start by looping over x-variable (space)
+
+    // save previous column in holder
+    std::vector<double> previous_col (runtime_args_->get_y_iterations(), 0.0);
+    for (unsigned int i = 0 ; i < runtime_args_->get_y_iterations(); ++i){
+        previous_col[i] = multiUSolutions_[0][i];
+    }
+
+    for (unsigned int  i = 1 ; i < runtime_args_->get_x_iterations()-1; ++i){
+        double uSolnym1 = multiUSolutions_[i][0];
+        for (unsigned int j = 1 ; j < runtime_args_->get_y_iterations()-1; ++j){
+            multiUSolutions_[i][j] = multiUSolutions_[i][j] -
+                                     c*dt/dx * (multiUSolutions_[i][j] - previous_col[j]) -
+                                     c*dt/dy * (multiUSolutions_[i][j] - uSolnym1);
+            uSolnym1 = multiUSolutions_[i][j];
+        }
+
+        //rewrite the previous_col
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            previous_col[j] = multiUSolutions_[i][j];
+        }
+
+    }
+     // Need to save the (n) state so as to not use (n+1) in solutions
+
+    // Need to write out solutions, but for now, leave that out
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::set_boundary(){
+
+    multiSolutionBoundaryCondition_ = new BoxBoundaryCondition;
+
+
+    //TODO: should probably allow the user to go ahead and set what boundary condition to be used
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimAdvection::set_init_cond(){
+
+    // hard code as wave type
+    multiSolutionInitialCondition_ = new Curvilinear;
 
     // TODO: should probably allow the user to go ahead and set the initial condition from the control file
 
