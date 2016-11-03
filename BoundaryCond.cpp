@@ -49,7 +49,7 @@ void BoxBoundaryCondition::enforce_boundary_conditions(std::vector<std::vector<d
         // convert index along i to an actual x value
         double curr_x = runtime.get_xo() + static_cast<double>(i) * runtime.get_dx();
         myArray[i][0] = TopWall(curr_x, runtime);
-        myArray[i][runtime.get_y_iterations()] = BottomWall(curr_x, runtime);
+        myArray[i][runtime.get_y_iterations()-1] = BottomWall(curr_x, runtime);
     }
 
     // Draw values along the LHS and RHS of the boundaries
@@ -57,25 +57,36 @@ void BoxBoundaryCondition::enforce_boundary_conditions(std::vector<std::vector<d
         // convert index along i to an actual y value
         double curr_y = runtime.get_yo() + static_cast<double>(i) + runtime.get_dy();
         myArray[0][i] = LHSWall(curr_y, runtime);
-        myArray[runtime.get_x_iterations()][i] = RHSWall(curr_y, runtime);
+        myArray[runtime.get_x_iterations()-1][i] = RHSWall(curr_y, runtime);
     }
 }
 
 // For now, fix the boundary condition to at least match
 double BoxBoundaryCondition::LHSWall(double y, RuntimeParamMultiDim& runtime){
-    return sin(y);
+    //return sin(y);
+    return 0.0;
+    //return -25.*(y-5.)*(y-5.);
 }
 
 double BoxBoundaryCondition::RHSWall(double y, RuntimeParamMultiDim& runtime){
     double L = runtime.get_xf()-runtime.get_xo();
-    return L*L*cos(y) + sin(y);
+    //return L*L*cos(y) + sin(y);
+    //return 2.0;
+    //return L*cos(L*y) - (L-5.)*(L-5.)*(y-5.)*(y-5.);
+    return 0.0;
 }
 
 double BoxBoundaryCondition::BottomWall(double x, RuntimeParamMultiDim& runtime){
-    return x*x;
+    //return x*x;
+    //return 3.0;
+    //return x-25*(x-5.)*(x-5.);
+    return 0.0;
 }
 
 double BoxBoundaryCondition::TopWall(double x, RuntimeParamMultiDim& runtime){
     double H = runtime.get_yf() - runtime.get_yo();
-    return x*x*cos(H) + sin(H);
+    //return x*x*cos(H) + sin(H);
+    //return 4.0;
+    //return x*cos(x*H) - (x-5.)*(x-5.)*(H-5.)*(H-5.);
+    return 0.0;
 }

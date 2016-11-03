@@ -12,15 +12,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3cf72f63-205a-41ec-bcb3-5bc56d8a00f6" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/CFD_HW.iml" afterPath="$PROJECT_DIR$/.idea/CFD_HW.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BoundaryCond.cpp" afterPath="$PROJECT_DIR$/BoundaryCond.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/BoundaryCond.h" afterPath="$PROJECT_DIR$/BoundaryCond.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IntCond.cpp" afterPath="$PROJECT_DIR$/IntCond.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IntCond.h" afterPath="$PROJECT_DIR$/IntCond.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RuntimeParameters.cpp" afterPath="$PROJECT_DIR$/RuntimeParameters.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RuntimeParameters.h" afterPath="$PROJECT_DIR$/RuntimeParameters.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SolutionProcedure.cpp" afterPath="$PROJECT_DIR$/SolutionProcedure.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SolutionProcedure.h" afterPath="$PROJECT_DIR$/SolutionProcedure.h" />
     </list>
@@ -49,7 +43,7 @@
       <file leaf-file-name="BoundaryCond.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BoundaryCond.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="128">
+            <state relative-caret-position="990">
               <caret line="66" column="109" selection-start-line="66" selection-start-column="9" selection-end-line="66" selection-end-column="109" />
               <folding>
                 <element signature="e#142#172#0" expanded="true" />
@@ -61,8 +55,8 @@
       <file leaf-file-name="BoundaryCond.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BoundaryCond.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="122">
-              <caret line="42" column="7" selection-start-line="42" selection-start-column="7" selection-end-line="42" selection-end-column="7" />
+            <state relative-caret-position="885">
+              <caret line="59" column="27" selection-start-line="59" selection-start-column="27" selection-end-line="59" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -71,7 +65,7 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="367">
+            <state relative-caret-position="465">
               <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
@@ -93,7 +87,7 @@
       <file leaf-file-name="IntCond.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/IntCond.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="592">
+            <state relative-caret-position="1320">
               <caret line="88" column="10" selection-start-line="88" selection-start-column="10" selection-end-line="88" selection-end-column="10" />
               <folding>
                 <element signature="e#160#177#0" expanded="true" />
@@ -105,7 +99,7 @@
       <file leaf-file-name="RuntimeParameters.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/RuntimeParameters.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="217">
+            <state relative-caret-position="3390">
               <caret line="226" column="38" selection-start-line="226" selection-start-column="17" selection-end-line="226" selection-end-column="38" />
               <folding>
                 <element signature="e#314#331#0" expanded="true" />
@@ -117,8 +111,8 @@
       <file leaf-file-name="SolutionProcedure.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SolutionProcedure.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="170" column="10" selection-start-line="170" selection-start-column="10" selection-end-line="170" selection-end-column="10" />
+            <state relative-caret-position="461">
+              <caret line="202" column="27" selection-start-line="202" selection-start-column="27" selection-end-line="202" selection-end-column="27" />
               <folding>
                 <element signature="e#121#138#0" expanded="true" />
               </folding>
@@ -129,8 +123,8 @@
       <file leaf-file-name="IntCond.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/IntCond.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="52">
-              <caret line="137" column="16" selection-start-line="137" selection-start-column="5" selection-end-line="137" selection-end-column="16" />
+            <state relative-caret-position="2160">
+              <caret line="144" column="0" selection-start-line="144" selection-start-column="0" selection-end-line="144" selection-end-column="0" />
               <folding>
                 <element signature="e#50#70#0" expanded="true" />
               </folding>
@@ -141,8 +135,8 @@
       <file leaf-file-name="SolutionProcedure.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SolutionProcedure.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="963" column="34" selection-start-line="963" selection-start-column="34" selection-end-line="963" selection-end-column="34" />
+            <state relative-caret-position="142">
+              <caret line="1227" column="9" selection-start-line="1227" selection-start-column="9" selection-end-line="1227" selection-end-column="9" />
               <folding>
                 <element signature="e#50#80#0" expanded="true" />
               </folding>
@@ -153,8 +147,8 @@
       <file leaf-file-name="RuntimeParameters.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/RuntimeParameters.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="217">
-              <caret line="445" column="1" selection-start-line="445" selection-start-column="1" selection-end-line="445" selection-end-column="1" />
+            <state relative-caret-position="5775">
+              <caret line="385" column="6" selection-start-line="385" selection-start-column="6" selection-end-line="385" selection-end-column="6" />
               <folding>
                 <element signature="e#106#136#0" expanded="true" />
               </folding>
@@ -182,12 +176,12 @@
         <option value="$PROJECT_DIR$/Example.cpp" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/IntCond.h" />
-        <option value="$PROJECT_DIR$/IntCond.cpp" />
         <option value="$PROJECT_DIR$/RuntimeParameters.h" />
         <option value="$PROJECT_DIR$/RuntimeParameters.cpp" />
-        <option value="$PROJECT_DIR$/SolutionProcedure.h" />
         <option value="$PROJECT_DIR$/BoundaryCond.h" />
         <option value="$PROJECT_DIR$/BoundaryCond.cpp" />
+        <option value="$PROJECT_DIR$/IntCond.cpp" />
+        <option value="$PROJECT_DIR$/SolutionProcedure.h" />
         <option value="$PROJECT_DIR$/SolutionProcedure.cpp" />
       </list>
     </option>
@@ -200,9 +194,8 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="-2" />
     <option name="y" value="22" />
-    <option name="width" value="1264" />
+    <option name="width" value="1265" />
     <option name="height" value="723" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -431,7 +424,7 @@
       <envs />
       <method />
     </configuration>
-    <configuration default="false" name="Build All" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="FixedLinearWaveEquation LinWaveTest.i results" WORKING_DIR="file://$USER_HOME$/Desktop/Semester/CFDHW/CFDHW5/1DLinWaveTest" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CFD_HW" TARGET_NAME="CFD_HW" CONFIG_NAME="Release" RUN_TARGET_PROJECT_NAME="CFD_HW" RUN_TARGET_NAME="CFD_HW">
+    <configuration default="false" name="Build All" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="LinearAdvectionEquation test_inputs.i release" WORKING_DIR="file://$USER_HOME$/Desktop/Semester/CFDHW/CFDHW5/2DLinearAdv" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CFD_HW" TARGET_NAME="CFD_HW" CONFIG_NAME="Release" RUN_TARGET_PROJECT_NAME="CFD_HW" RUN_TARGET_NAME="CFD_HW">
       <envs />
       <method />
     </configuration>
@@ -480,25 +473,32 @@
       <workItem from="1478020164353" duration="2072000" />
       <workItem from="1478035725470" duration="5785000" />
       <workItem from="1478045702967" duration="20642000" />
+      <workItem from="1478100118609" duration="458000" />
+      <workItem from="1478109697110" duration="737000" />
+      <workItem from="1478113970652" duration="1449000" />
+      <workItem from="1478127003858" duration="3959000" />
+      <workItem from="1478142328292" duration="5218000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="87533000" />
+    <option name="totallyTimeSpent" value="99354000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-2" y="22" width="1264" height="723" extended-state="0" />
+    <frame x="0" y="22" width="1265" height="723" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21677215" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32721713" sideWeight="0.41729012" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32721713" sideWeight="0.41729012" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5561097" order="10" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32721713" sideWeight="0.44389027" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21897233" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32874617" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.4970906" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.48379052" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -506,7 +506,6 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.4970906" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -824,19 +823,11 @@
     <entry file="file://$PROJECT_DIR$/boost/multi_array.hpp" />
     <entry file="file://$PROJECT_DIR$/multi_array.hpp" />
     <entry file="file://$PROJECT_DIR$/boost/multi_array/base.hpp" />
-    <entry file="file://$PROJECT_DIR$/Example.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/Example.cpp" />
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -844,7 +835,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="1" selection-start-line="9" selection-start-column="1" selection-end-line="9" selection-end-column="1" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -858,7 +848,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="367">
+        <state relative-caret-position="465">
           <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
@@ -868,7 +858,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/IntCond.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="592">
+        <state relative-caret-position="1320">
           <caret line="88" column="10" selection-start-line="88" selection-start-column="10" selection-end-line="88" selection-end-column="10" />
           <folding>
             <element signature="e#160#177#0" expanded="true" />
@@ -876,39 +866,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/IntCond.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="137" column="16" selection-start-line="137" selection-start-column="5" selection-end-line="137" selection-end-column="16" />
-          <folding>
-            <element signature="e#50#70#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/RuntimeParameters.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="445" column="1" selection-start-line="445" selection-start-column="1" selection-end-line="445" selection-end-column="1" />
-          <folding>
-            <element signature="e#106#136#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SolutionProcedure.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="170" column="10" selection-start-line="170" selection-start-column="10" selection-end-line="170" selection-end-column="10" />
-          <folding>
-            <element signature="e#121#138#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/BoundaryCond.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="128">
+        <state relative-caret-position="990">
           <caret line="66" column="109" selection-start-line="66" selection-start-column="9" selection-end-line="66" selection-end-column="109" />
           <folding>
             <element signature="e#142#172#0" expanded="true" />
@@ -916,17 +876,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BoundaryCond.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="122">
-          <caret line="42" column="7" selection-start-line="42" selection-start-column="7" selection-end-line="42" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/RuntimeParameters.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
+        <state relative-caret-position="3390">
           <caret line="226" column="38" selection-start-line="226" selection-start-column="17" selection-end-line="226" selection-end-column="38" />
           <folding>
             <element signature="e#314#331#0" expanded="true" />
@@ -934,10 +886,48 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/RuntimeParameters.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5775">
+          <caret line="385" column="6" selection-start-line="385" selection-start-column="6" selection-end-line="385" selection-end-column="6" />
+          <folding>
+            <element signature="e#106#136#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BoundaryCond.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="885">
+          <caret line="59" column="27" selection-start-line="59" selection-start-column="27" selection-end-line="59" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/IntCond.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2160">
+          <caret line="144" column="0" selection-start-line="144" selection-start-column="0" selection-end-line="144" selection-end-column="0" />
+          <folding>
+            <element signature="e#50#70#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SolutionProcedure.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="461">
+          <caret line="202" column="27" selection-start-line="202" selection-start-column="27" selection-end-line="202" selection-end-column="27" />
+          <folding>
+            <element signature="e#121#138#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/SolutionProcedure.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="963" column="34" selection-start-line="963" selection-start-column="34" selection-end-line="963" selection-end-column="34" />
+        <state relative-caret-position="142">
+          <caret line="1227" column="9" selection-start-line="1227" selection-start-column="9" selection-end-line="1227" selection-end-column="9" />
           <folding>
             <element signature="e#50#80#0" expanded="true" />
           </folding>

@@ -135,8 +135,14 @@ void Curvilinear::convert_idx_to_position(int idx, double dx, double xo, double&
     // TODO: shared between both, should probably tuck away in the base class for now
 }
 
-void Curvilinear::pos_func(double x, double y, double& u){
-    u = x * x * cos(y) + sin(y);
+void Curvilinear::pos_func(double x, double y, double& u) {
+    double x_shift = x-5.;
+    double y_shift = y-5.;
+
+    double dist = sqrt(x_shift * x_shift + y_shift * y_shift);
+
+    u = fabs(sin(dist)/(dist));
+
 }
 
 void Curvilinear::apply_initial_cond(std::vector<std::vector<double>>& uSoln, RuntimeParamMultiDim& runtime){
