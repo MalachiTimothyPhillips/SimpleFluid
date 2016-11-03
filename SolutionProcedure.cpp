@@ -39,7 +39,9 @@ SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &
     if (equationType == "NonLinAdvEqn"){
         return new SolutionProcedureMultiDimNonLinAdvEqn;
     }
-
+    if (equationType == "MultiDimDiffusion"){
+        return new SolutionProcedureMultiDimDiffusion;
+    }
 
     else{
         std::cout << "Error: could not correctly find your PDE equation to solve!" << std::endl;
@@ -1228,9 +1230,9 @@ void SolutionProcedureMultiDimNonLinAdvEqn::apply_step(){
         }
 
     }
-    // Need to save the (n) state so as to not use (n+1) in solutions
 
-    // Need to write out solutions, but for now, leave that out
+    // Add to extra time
+    currentTime_ += dt;
 }
 
 //============================================================================================================
@@ -1245,6 +1247,473 @@ void SolutionProcedureMultiDimNonLinAdvEqn::set_boundary(){
 
 //============================================================================================================
 void SolutionProcedureMultiDimNonLinAdvEqn::set_init_cond(){
+
+    // hard code as wave type
+    multiSolutionInitialCondition_ = new Curvilinear;
+
+    // TODO: should probably allow the user to go ahead and set the initial condition from the control file
+
+}
+
+//============================================================================================================
+/*
+ * Solution procedure for multidimensional diffusion equation
+ */
+//============================================================================================================
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::start_procedure(std::string& runtime_params, std::string& template_file_name ){
+
+    // Since type is already known, just hard code in the file reader
+    runtime_args_ = new RuntimeParamMultiDim;
+
+    runtime_args_->read_parameters_from_file(runtime_params);
+
+    // Will take from input user to set boundary/initial condition type
+    // Fow now, hard code it
+
+    set_boundary();
+    set_init_cond();
+
+    // set size of vector
+    unsigned int XSIZE = runtime_args_->get_x_iterations();
+    unsigned int YSIZE = runtime_args_->get_y_iterations();
+    multiUSolutions_.resize(XSIZE, std::vector<double>(YSIZE));
+
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // For first step, need to apply the initial condition
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+    multiSolutionInitialCondition_->apply_initial_cond(multiUSolutions_, *(runtime_args_));
+
+    // execute procedure
+    procedure(template_file_name);
+
+    // end procedure
+    end_procedure();
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::convert_idx_to_pos_x(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+
+    pos = (double)(idx) * dx + xo;
+
+}
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::convert_idx_to_pos_y(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dy = runtime_args_->get_dy();
+    double yo = runtime_args_->get_yo();
+
+    pos = (double)(idx) * dy + yo;
+
+}
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::write_to_file()
+{
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::procedure(std::string& template_file_name){
+
+    // write first point -- initial condition onto file
+    double to = runtime_args_->get_to();
+    std::ofstream outFile (template_file_name + "0");
+    std::cout.fill(' ');
+
+    // Needed nested for loops
+    for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            //write to file (x,y) pair, with u(x,y) at current time step
+            double posx;
+            convert_idx_to_pos_x(i, posx);
+            double posy;
+            convert_idx_to_pos_y(j, posy);
+            outFile << std::setw(4) << posx << "     ";
+            outFile << posy << "     ";
+            outFile << multiUSolutions_[i][j] << std::endl;
+        }
+    }
+
+    outFile.close();
+
+
+    // Apply step at every time step
+    for(unsigned int t = 1; t < runtime_args_->get_time_iterations(); ++t){
+        apply_step();
+
+        // write results to output file, need x's, y's, and t's
+        outFile.open(template_file_name + std::to_string(t));
+
+        // I hate the idea of a triply nested for loop, but this just prints out data
+        for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+            for (unsigned int  j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+                //write to file (x,y) pair, with u(x,y) at current time step
+                double posx;
+                convert_idx_to_pos_x(i,posx);
+                double posy;
+                convert_idx_to_pos_y(j,posy);
+                outFile << std::setw(4) << posx << "     ";
+                outFile << posy << "     ";
+                outFile << multiUSolutions_[i][j] << std::endl;
+            }
+        }
+
+        outFile.close();
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::end_procedure(){
+    // something important to finish writing the output file
+    std::cout << "Done." << std::endl;
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::apply_step(){
+
+    // Apply individual step to solutions
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // loops over entries, save the one involved in the boundary condition
+    // boundary hard coded to LHS of wall
+
+
+    double c = runtime_args_->get_c(); // In this case, the nu coefficient in the equation
+    double dx = runtime_args_->get_dx();
+    double dy = runtime_args_->get_dy();
+    double dt = runtime_args_->get_dt();
+
+    // Assume the user has specified a reasonable set of conditions
+    // Else, throw a warning to the user that this has occured.
+
+    // start by looping over x-variable (space)
+
+    // save previous column in holder
+    std::vector<double> previous_col (runtime_args_->get_y_iterations(), 0.0);
+    for (unsigned int i = 0 ; i < runtime_args_->get_y_iterations(); ++i){
+        previous_col[i] = multiUSolutions_[0][i];
+    }
+
+    for (unsigned int  i = 1 ; i < runtime_args_->get_x_iterations()-1; ++i){
+        double uSolnym1 = multiUSolutions_[i][0];
+        for (unsigned int j = 1 ; j < runtime_args_->get_y_iterations()-1; ++j){
+            double uij = multiUSolutions_[i][j];
+            double uip1j = multiUSolutions_[i+1][j];
+            double uim1j = previous_col[j];
+            double uijp1 = multiUSolutions_[i][j+1];
+            double uijm1 = uSolnym1;
+            double fx = c*dt/(dx*dx);
+            double fy = c*dt/(dy*dy);
+
+            multiUSolutions_[i][j] = uij + fx * (uip1j - 2 * uij + uim1j)
+                    + fy * (uijp1 - 2 * uij + uijm1);
+
+
+            uSolnym1 = multiUSolutions_[i][j];
+        }
+
+        //rewrite the previous_col
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            previous_col[j] = multiUSolutions_[i][j];
+        }
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::set_boundary(){
+
+    multiSolutionBoundaryCondition_ = new BoxBoundaryCondition;
+
+
+    //TODO: should probably allow the user to go ahead and set what boundary condition to be used
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::set_init_cond(){
+
+    // hard code as wave type
+    multiSolutionInitialCondition_ = new Curvilinear;
+
+    // TODO: should probably allow the user to go ahead and set the initial condition from the control file
+
+}
+
+//============================================================================================================
+/*
+ * Solution procedure for multidimensional burger equation
+ */
+//============================================================================================================
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::start_procedure(std::string& runtime_params, std::string& template_file_name ){
+
+    // Since type is already known, just hard code in the file reader
+    runtime_args_ = new RuntimeParamMultiDim;
+
+    runtime_args_->read_parameters_from_file(runtime_params);
+
+    // Will take from input user to set boundary/initial condition type
+    // Fow now, hard code it
+
+    set_boundary();
+    set_init_cond();
+
+    // set size of vector
+    unsigned int XSIZE = runtime_args_->get_x_iterations();
+    unsigned int YSIZE = runtime_args_->get_y_iterations();
+    multiUSolutions_.resize(XSIZE, std::vector<double>(YSIZE));
+    multiVSolutions_.resize(XSIZE, std::vector<double>(YSIZE));
+
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiVSolutions_, *(runtime_args_));
+
+    // For first step, need to apply the initial condition
+    multiSolutionInitialCondition_->apply_initial_cond(multiUSolutions_, *(runtime_args_));
+    multiSolutionInitialCondition_->apply_initial_cond(multiVSolutions_, *(runtime_args_));
+
+    // execute procedure
+    procedure(template_file_name);
+
+    // end procedure
+    end_procedure();
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::convert_idx_to_pos_x(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+
+    pos = (double)(idx) * dx + xo;
+
+}
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::convert_idx_to_pos_y(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dy = runtime_args_->get_dy();
+    double yo = runtime_args_->get_yo();
+
+    pos = (double)(idx) * dy + yo;
+
+}
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::write_to_file()
+{
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::procedure(std::string& template_file_name){
+
+    // write first point -- initial condition onto file
+    double to = runtime_args_->get_to();
+    std::ofstream outFileU (template_file_name + "U-0");
+    std::ofstream outFileV (template_file_name + "V-0");
+
+    // Needed nested for loops
+    for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            //write to file (x,y) pair, with u(x,y) at current time step
+            double posx;
+            convert_idx_to_pos_x(i, posx);
+            double posy;
+            convert_idx_to_pos_y(j, posy);
+            outFileU << std::setw(4) << posx << "     ";
+            outFileU << posy << "     ";
+            outFileU << multiUSolutions_[i][j] << std::endl;
+            outFileV << std::setw(4) << posx << "     ";
+            outFileV << posy << "     ";
+            outFileV << multiVSolutions_[i][j] << std::endl;
+
+        }
+    }
+
+    outFileU.close();
+    outFileV.close();
+
+
+    // Apply step at every time step
+    for(unsigned int t = 1; t < runtime_args_->get_time_iterations(); ++t){
+        apply_step();
+
+        // write results to output file, need x's, y's, and t's
+        outFileU.open(template_file_name + std::to_string(currentTime_));
+        outFileV.open(template_file_name + std::to_string(currentTime_));
+
+        // I hate the idea of a triply nested for loop, but this just prints out data
+        for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+            for (unsigned int  j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+                //write to file (x,y) pair, with u(x,y) at current time step
+                double posx;
+                convert_idx_to_pos_x(i,posx);
+                double posy;
+                convert_idx_to_pos_y(j,posy);
+                outFileU << std::setw(4) << posx << "     ";
+                outFileU << posy << "     ";
+                outFileU << multiUSolutions_[i][j] << std::endl;
+                outFileV << std::setw(4) << posx << "     ";
+                outFileV << posy << "     ";
+                outFileV << multiUSolutions_[i][j] << std::endl;
+            }
+        }
+
+        outFileU.close();
+        outFileV.close();
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::end_procedure(){
+    // something important to finish writing the output file
+    std::cout << "Done." << std::endl;
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::apply_step(){
+
+    // Apply individual step to solutions
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // loops over entries, save the one involved in the boundary condition
+    // boundary hard coded to LHS of wall
+
+
+    double c = runtime_args_->get_c(); // No longer wave speed, but maximum allowable CFL number
+    double dx = runtime_args_->get_dx();
+    double dy = runtime_args_->get_dy();
+    double nu = runtime_args_->get_dt(); // No longer dt, but nu on the diffusion portion
+    double dt;
+
+
+    /*
+     * calculate current dt needed, new current time after update
+     */
+
+    // Find the maximum U and V, this is actually costly
+    std::vector<double> maxUs;
+    std::vector<double> maxVs;
+    for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+        maxUs.push_back(*std::max_element(std::begin(multiUSolutions_[i]), std::end(multiUSolutions_[i])));
+        maxVs.push_back(*std::max_element(std::begin(multiVSolutions_[i]), std::end(multiVSolutions_[i])));
+    }
+    double maxU = *std::max_element(std::begin(maxUs), std::end(maxUs));
+    double maxV = *std::max_element(std::begin(maxVs), std::end(maxVs));
+
+    double maxC = std::max(maxU, maxV); // Largest value in wave speed
+
+    /*
+     * Have Udt/dx + Udt/dy = SF -> dt = SF/(U/dx + U/dy)
+     */
+
+    dt = c/(maxC/dx + maxC/dy); // Recall c: is in this case the max CFL (safety), likely 0.9 for safety
+
+    // start by looping over x-variable (space)
+
+    // save previous column in holder
+    std::vector<double> previous_colU (runtime_args_->get_y_iterations(), 0.0);
+    std::vector<double> previous_colV (runtime_args_->get_y_iterations(), 0.0);
+    for (unsigned int i = 0 ; i < runtime_args_->get_y_iterations(); ++i){
+        previous_colU[i] = multiUSolutions_[0][i];
+        previous_colV[i] = multiVSolutions_[0][i];
+    }
+
+    for (unsigned int  i = 1 ; i < runtime_args_->get_x_iterations()-1; ++i){
+        double uSolnym1 = multiUSolutions_[i][0];
+        double vSolynm1 = multiVSolutions_[i][0];
+        for (unsigned int j = 1 ; j < runtime_args_->get_y_iterations()-1; ++j){
+            // Solve U, V into temporary holders first
+            double temp_u_at_ij;
+            double temp_v_at_ij;
+
+            // For easier reference
+            double uij = multiUSolutions_[i][j];
+            double uip1j = multiUSolutions_[i+1][j];
+            double uim1j = previous_colU[j];
+            double uijp1 = multiUSolutions_[i][j+1];
+            double uijm1 = uSolnym1;
+            double vij = multiVSolutions_[i][j];
+            double vip1j = multiVSolutions_[i+1][j];
+            double vim1j = previous_colV[j];
+            double vijp1 = multiVSolutions_[i][j+1];
+            double vijm1 = vSolynm1;
+            double fx = 0.5*dt/dx;
+            double fy = 0.5*dt/dy;
+            double fxdiff = nu*dt/(dx*dx);
+            double fydiff = nu*dt/(dy*dy);
+
+
+            temp_u_at_ij = uij - uij * fx * (uip1j - uim1j) + fabs(uij) * fx * (uip1j - 2*uij + uim1j)
+                           - vij * fy * (uijp1 - uijm1) + fabs(vij) * fy * (uijp1 - 2*uij + uijm1); // From burger
+
+            temp_u_at_ij += fxdiff * (uip1j - 2 * uij + uim1j) + fydiff * (uijp1 - 2 * uij + uijm1); // From diffusion
+
+            temp_v_at_ij = vij - uij * fx * (vip1j - vim1j) + fabs(uij) * fx * (vip1j - 2*vij + vim1j)
+                           - vij * fy * (vijp1 - vijm1) + fabs(vij) * fy * (vijp1 - 2*vij + vijm1); // From burger
+
+            temp_v_at_ij += fxdiff * (vip1j - 2 * vij + vim1j) + fydiff * (vijp1 - 2 * vij + vijm1); // From diffusion
+
+            // Merely add on separate portions from before.
+
+            // Write U, V into new form
+            multiUSolutions_[i][j] = temp_u_at_ij;
+            multiVSolutions_[i][j] = temp_v_at_ij;
+
+            uSolnym1 = multiUSolutions_[i][j];
+            vSolynm1 = multiVSolutions_[i][j];
+
+        }
+
+        //rewrite the previous_col
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            previous_colU[j] = multiUSolutions_[i][j];
+            previous_colV[j] = multiVSolutions_[i][j];
+        }
+
+    }
+
+    // Add to extra time
+    currentTime_ += dt;
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::set_boundary(){
+
+    multiSolutionBoundaryCondition_ = new BoxBoundaryCondition;
+
+
+    //TODO: should probably allow the user to go ahead and set what boundary condition to be used
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimBurger::set_init_cond(){
 
     // hard code as wave type
     multiSolutionInitialCondition_ = new Curvilinear;

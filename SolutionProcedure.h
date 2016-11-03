@@ -207,4 +207,57 @@ protected:
 
 };
 
+/*
+ * Solution procedure for 2D diffusion equation
+ */
+class SolutionProcedureMultiDimDiffusion : public MultiDimProcedure  {
+public:
+    void apply_step();
+    void end_procedure();
+    void start_procedure(std::string& runtime_params, std::string& template_file_name);
+    void procedure(std::string& template_file_name);
+    void convert_idx_to_pos_x(unsigned int idx, double& pos);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+    void write_to_file();
+protected:
+
+    // Multi dimensional parameters
+    RuntimeParamMultiDim* runtime_args_;
+
+    void set_boundary();
+    void set_init_cond();
+
+};
+
+/*
+ * Solution procedure for 2D viscous burger equation
+ */
+class SolutionProcedureMultiDimBurger : public MultiDimProcedure  {
+public:
+    void apply_step();
+    void end_procedure();
+    void start_procedure(std::string& runtime_params, std::string& template_file_name);
+    void procedure(std::string& template_file_name);
+    void convert_idx_to_pos_x(unsigned int idx, double& pos);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+    void write_to_file();
+    double get_current_time() {return currentTime_; } ;
+protected:
+
+    // Multi dimensional parameters
+    RuntimeParamMultiDim* runtime_args_;
+
+    // For my other sub problem
+    std::vector<std::vector<double>> multiVSolutions_;
+
+    double currentTime_ = 0;
+
+    void set_boundary();
+    void set_init_cond();
+
+};
+
+
+
+
 #endif //CFD_HW_SOLUTIONPROCEDURE_H
