@@ -64,7 +64,7 @@ void BoxBoundaryCondition::enforce_boundary_conditions(std::vector<std::vector<d
 // For now, fix the boundary condition to at least match
 double BoxBoundaryCondition::LHSWall(double y, RuntimeParamMultiDim& runtime){
     //return sin(y);
-    return 0.0;
+    return 1.0;
     //return -25.*(y-5.)*(y-5.);
 }
 
@@ -73,14 +73,15 @@ double BoxBoundaryCondition::RHSWall(double y, RuntimeParamMultiDim& runtime){
     //return L*L*cos(y) + sin(y);
     //return 2.0;
     //return L*cos(L*y) - (L-5.)*(L-5.)*(y-5.)*(y-5.);
-    return 0.0;
+    //return sin(L) * sin(y);
+    return 1.0;
 }
 
 double BoxBoundaryCondition::BottomWall(double x, RuntimeParamMultiDim& runtime){
     //return x*x;
     //return 3.0;
     //return x-25*(x-5.)*(x-5.);
-    return 0.0;
+    return 1.0;
 }
 
 double BoxBoundaryCondition::TopWall(double x, RuntimeParamMultiDim& runtime){
@@ -88,5 +89,6 @@ double BoxBoundaryCondition::TopWall(double x, RuntimeParamMultiDim& runtime){
     //return x*x*cos(H) + sin(H);
     //return 4.0;
     //return x*cos(x*H) - (x-5.)*(x-5.)*(H-5.)*(H-5.);
-    return 0.0;
+    //return sin(H) * sin(x);
+    return 1.0;
 }

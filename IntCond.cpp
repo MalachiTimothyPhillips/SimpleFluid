@@ -136,12 +136,28 @@ void Curvilinear::convert_idx_to_position(int idx, double dx, double xo, double&
 }
 
 void Curvilinear::pos_func(double x, double y, double& u) {
-    double x_shift = x-5.;
-    double y_shift = y-5.;
+//    double x_shift = x-5.;
+//    double y_shift = y-5.;
+//
+//    double dist = sqrt(x_shift * x_shift + y_shift * y_shift);
+//
+//    u = fabs(sin(dist)/(dist));
+//
+//    // if radius is greater than 2.85234173635078, set to 0.1
+//    if (dist >=  2.85234173635078){
+//        u = 0.1;
+//    }
 
-    double dist = sqrt(x_shift * x_shift + y_shift * y_shift);
+    //u = sin(x)*sin(y);
 
-    u = fabs(sin(dist)/(dist));
+    // Square wave
+    // draw square wave size (0,0),(1,0),(0,1)(1,1)
+    if ( x < 1.0 && y < 1.0){
+        u = 5.0;
+    }
+    else{
+        u = 1.0;
+    }
 
 }
 

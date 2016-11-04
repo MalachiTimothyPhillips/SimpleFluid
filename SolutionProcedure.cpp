@@ -42,6 +42,9 @@ SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &
     if (equationType == "MultiDimDiffusion"){
         return new SolutionProcedureMultiDimDiffusion;
     }
+    if (equationType == "MultiDimBurger"){
+        return new SolutionProcedureMultiDimBurger;
+    }
 
     else{
         std::cout << "Error: could not correctly find your PDE equation to solve!" << std::endl;
@@ -895,7 +898,7 @@ void SolutionProcedureMultiDimAdvection::procedure(std::string& template_file_na
             convert_idx_to_pos_x(i, posx);
             double posy;
             convert_idx_to_pos_y(j, posy);
-            outFile << std::setw(4) << posx << "     ";
+            outFile << std::setw(4) << posx << "    ";
             outFile << posy << "     ";
             outFile << multiUSolutions_[i][j] << std::endl;
         }
@@ -919,8 +922,8 @@ void SolutionProcedureMultiDimAdvection::procedure(std::string& template_file_na
                 convert_idx_to_pos_x(i,posx);
                 double posy;
                 convert_idx_to_pos_y(j,posy);
-                outFile << std::setw(4) << posx << "     ";
-                outFile << posy << "     ";
+                outFile << std::setw(4) << posx << "    ";
+                outFile << posy << "    ";
                 outFile << multiUSolutions_[i][j] << std::endl;
             }
         }
@@ -960,12 +963,20 @@ void SolutionProcedureMultiDimAdvection::apply_step(){
         previous_col[i] = multiUSolutions_[0][i];
     }
 
-    for (unsigned int  i = 1 ; i < runtime_args_->get_x_iterations()-1; ++i){
+    for (unsigned int  i = 1 ; i < runtime_args_->get_x_iterations()-2; ++i){
         double uSolnym1 = multiUSolutions_[i][0];
-        for (unsigned int j = 1 ; j < runtime_args_->get_y_iterations()-1; ++j){
-            multiUSolutions_[i][j] = multiUSolutions_[i][j] -
-                                     c*dt/dx * (multiUSolutions_[i][j] - previous_col[j]) -
-                                     c*dt/dy * (multiUSolutions_[i][j] - uSolnym1);
+        for (unsigned int j = 1 ; j < runtime_args_->get_y_iterations()-2; ++j){
+            double uij = multiUSolutions_[i][j];
+            double uip1j = multiUSolutions_[i+1][j];
+            double uim1j = previous_col[j];
+            double uijp1 = multiUSolutions_[i][j+1];
+            double uijm1 = uSolnym1;
+            double fx = 0.5*dt/dx;
+            double fy = 0.5*dt/dy;
+
+            // Change to upshift/downshift equation form
+            multiUSolutions_[i][j] = uij - c * fx * (uip1j - uim1j) + fabs(c) * fx * (uip1j - 2. * uij + uim1j)
+                    - c * fy * (uijp1 - uijm1) + fabs(c) * fy * (uijp1 - 2. * uij + uijm1);
             uSolnym1 = multiUSolutions_[i][j];
         }
 
@@ -1075,8 +1086,8 @@ void SolutionProcedureMultiDimNonLinAdvEqn::procedure(std::string& template_file
 
     // write first point -- initial condition onto file
     double to = runtime_args_->get_to();
-    std::ofstream outFileU (template_file_name + "U-0");
-    std::ofstream outFileV (template_file_name + "V-0");
+    std::ofstream outFileU (template_file_name + "U0");
+    std::ofstream outFileV (template_file_name + "V0");
 
     // Needed nested for loops
     for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
@@ -1105,8 +1116,8 @@ void SolutionProcedureMultiDimNonLinAdvEqn::procedure(std::string& template_file
         apply_step();
 
         // write results to output file, need x's, y's, and t's
-        outFileU.open(template_file_name + std::to_string(currentTime_));
-        outFileV.open(template_file_name + std::to_string(currentTime_));
+        outFileU.open(template_file_name + "U" + std::to_string(t));// + "U-" + std::to_string(currentTime_));
+        outFileV.open(template_file_name + "V" + std::to_string(t));// + "V-" + std::to_string(currentTime_));
 
         // I hate the idea of a triply nested for loop, but this just prints out data
         for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
@@ -1208,11 +1219,11 @@ void SolutionProcedureMultiDimNonLinAdvEqn::apply_step(){
             double fx = 0.5*dt/dx;
             double fy = 0.5*dt/dy;
 
-            temp_u_at_ij = uij - uij * fx * (uip1j - uim1j) + fabs(uij) * fx * (uip1j - 2*uij + uim1j)
-                    - vij * fy * (uijp1 - uijm1) + fabs(vij) * fy * (uijp1 - 2*uij + uijm1);
+            temp_u_at_ij = uij - uij * fx * (uip1j - uim1j) + fabs(uij) * fx * (uip1j - 2.*uij + uim1j)
+                    - vij * fy * (uijp1 - uijm1) + fabs(vij) * fy * (uijp1 - 2.*uij + uijm1);
 
-            temp_v_at_ij = vij - uij * fx * (vip1j - vim1j) + fabs(uij) * fx * (vip1j - 2*vij + vim1j)
-                    - vij * fy * (vijp1 - vijm1) + fabs(vij) * fy * (vijp1 - 2*vij + vijm1);
+            temp_v_at_ij = vij - uij * fx * (vip1j - vim1j) + fabs(uij) * fx * (vip1j - 2.*vij + vim1j)
+                    - vij * fy * (vijp1 - vijm1) + fabs(vij) * fy * (vijp1 - 2.*vij + vijm1);
 
             // Write U, V into new form
             multiUSolutions_[i][j] = temp_u_at_ij;
@@ -1420,8 +1431,8 @@ void SolutionProcedureMultiDimDiffusion::apply_step(){
             double fx = c*dt/(dx*dx);
             double fy = c*dt/(dy*dy);
 
-            multiUSolutions_[i][j] = uij + fx * (uip1j - 2 * uij + uim1j)
-                    + fy * (uijp1 - 2 * uij + uijm1);
+            multiUSolutions_[i][j] = uij + fx * (uip1j - 2. * uij + uim1j)
+                    + fy * (uijp1 - 2. * uij + uijm1);
 
 
             uSolnym1 = multiUSolutions_[i][j];
@@ -1608,7 +1619,7 @@ void SolutionProcedureMultiDimBurger::apply_step(){
     double c = runtime_args_->get_c(); // No longer wave speed, but maximum allowable CFL number
     double dx = runtime_args_->get_dx();
     double dy = runtime_args_->get_dy();
-    double nu = runtime_args_->get_dt(); // No longer dt, but nu on the diffusion portion
+    double nu = runtime_args_->get_tf(); // No longer tf, but nu on the diffusion portion
     double dt;
 
 
@@ -1631,8 +1642,16 @@ void SolutionProcedureMultiDimBurger::apply_step(){
     /*
      * Have Udt/dx + Udt/dy = SF -> dt = SF/(U/dx + U/dy)
      */
+    double dt_adv;
+    dt_adv = c/(maxC/dx + maxC/dy); // Recall c: is in this case the max CFL (safety), likely 0.9 for safety
 
-    dt = c/(maxC/dx + maxC/dy); // Recall c: is in this case the max CFL (safety), likely 0.9 for safety
+    // dt also needs to be calculated another means to ensure diffusive part is O.K.
+    double dt_diff;
+    double den = nu * (1./dx/dx + 1./dy/dy);
+    dt_diff = 0.5*c/den;
+
+    // Take minimum dt from list
+    dt = std::min(dt_diff,dt_adv);
 
     // start by looping over x-variable (space)
 
@@ -1669,15 +1688,15 @@ void SolutionProcedureMultiDimBurger::apply_step(){
             double fydiff = nu*dt/(dy*dy);
 
 
-            temp_u_at_ij = uij - uij * fx * (uip1j - uim1j) + fabs(uij) * fx * (uip1j - 2*uij + uim1j)
-                           - vij * fy * (uijp1 - uijm1) + fabs(vij) * fy * (uijp1 - 2*uij + uijm1); // From burger
+            temp_u_at_ij = uij - uij * fx * (uip1j - uim1j) + fabs(uij) * fx * (uip1j - 2.*uij + uim1j)
+                           - vij * fy * (uijp1 - uijm1) + fabs(vij) * fy * (uijp1 - 2.*uij + uijm1); // From burger
 
-            temp_u_at_ij += fxdiff * (uip1j - 2 * uij + uim1j) + fydiff * (uijp1 - 2 * uij + uijm1); // From diffusion
+            temp_u_at_ij += fxdiff * (uip1j - 2. * uij + uim1j) + fydiff * (uijp1 - 2. * uij + uijm1); // From diffusion
 
-            temp_v_at_ij = vij - uij * fx * (vip1j - vim1j) + fabs(uij) * fx * (vip1j - 2*vij + vim1j)
-                           - vij * fy * (vijp1 - vijm1) + fabs(vij) * fy * (vijp1 - 2*vij + vijm1); // From burger
+            temp_v_at_ij = vij - uij * fx * (vip1j - vim1j) + fabs(uij) * fx * (vip1j - 2.*vij + vim1j)
+                           - vij * fy * (vijp1 - vijm1) + fabs(vij) * fy * (vijp1 - 2.*vij + vijm1); // From burger
 
-            temp_v_at_ij += fxdiff * (vip1j - 2 * vij + vim1j) + fydiff * (vijp1 - 2 * vij + vijm1); // From diffusion
+            temp_v_at_ij += fxdiff * (vip1j - 2. * vij + vim1j) + fydiff * (vijp1 - 2. * vij + vijm1); // From diffusion
 
             // Merely add on separate portions from before.
 
