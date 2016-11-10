@@ -1740,3 +1740,204 @@ void SolutionProcedureMultiDimBurger::set_init_cond(){
     // TODO: should probably allow the user to go ahead and set the initial condition from the control file
 
 }
+
+//============================================================================================================
+/*
+ * Solution procedure for steady state laplace equation
+ */
+//============================================================================================================
+
+//============================================================================================================
+void SolutionProcedureLaplace::start_procedure(std::string& runtime_params, std::string& template_file_name ){
+
+    // Since type is already known, just hard code in the file reader
+    runtime_args_ = new RuntimeParamMultiDim;
+
+    runtime_args_->read_parameters_from_file(runtime_params);
+
+    // Will take from input user to set boundary/initial condition type
+    // Fow now, hard code it
+
+    set_boundary();
+    set_init_cond();
+
+    // set size of vector
+    unsigned int XSIZE = runtime_args_->get_x_iterations();
+    unsigned int YSIZE = runtime_args_->get_y_iterations();
+    multiUSolutions_.resize(XSIZE, std::vector<double>(YSIZE));
+
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // For first step, need to apply the initial condition
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+    multiSolutionInitialCondition_->apply_initial_cond(multiUSolutions_, *(runtime_args_));
+
+    // execute procedure
+    procedure(template_file_name);
+
+    // end procedure
+    end_procedure();
+
+}
+
+//============================================================================================================
+void SolutionProcedureLaplace::convert_idx_to_pos_x(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dx = runtime_args_->get_dx();
+    double xo = runtime_args_->get_xo();
+
+    pos = (double)(idx) * dx + xo;
+
+}
+//============================================================================================================
+void SolutionProcedureLaplace::convert_idx_to_pos_y(unsigned int idx, double& pos){
+
+    // Convert from index to position
+    // idx * dx + xo = current position
+    double dy = runtime_args_->get_dy();
+    double yo = runtime_args_->get_yo();
+
+    pos = (double)(idx) * dy + yo;
+
+}
+//============================================================================================================
+void SolutionProcedureLaplace::write_to_file()
+{
+
+}
+
+//============================================================================================================
+void SolutionProcedureMultiDimDiffusion::procedure(std::string& template_file_name){
+
+    // write first point -- initial condition onto file
+    double to = runtime_args_->get_to();
+    std::ofstream outFile (template_file_name + "0");
+    std::cout.fill(' ');
+
+    // Needed nested for loops
+    for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            //write to file (x,y) pair, with u(x,y) at current time step
+            double posx;
+            convert_idx_to_pos_x(i, posx);
+            double posy;
+            convert_idx_to_pos_y(j, posy);
+            outFile << std::setw(4) << posx << "     ";
+            outFile << posy << "     ";
+            outFile << multiUSolutions_[i][j] << std::endl;
+        }
+    }
+
+    outFile.close();
+
+
+    // Apply step at every time step
+    for(unsigned int t = 1; t < runtime_args_->get_time_iterations(); ++t){
+        apply_step();
+
+        // write results to output file, need x's, y's, and t's
+        outFile.open(template_file_name + std::to_string(t));
+
+        // I hate the idea of a triply nested for loop, but this just prints out data
+        for (unsigned int i = 0 ; i < runtime_args_->get_x_iterations(); ++i){
+            for (unsigned int  j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+                //write to file (x,y) pair, with u(x,y) at current time step
+                double posx;
+                convert_idx_to_pos_x(i,posx);
+                double posy;
+                convert_idx_to_pos_y(j,posy);
+                outFile << std::setw(4) << posx << "     ";
+                outFile << posy << "     ";
+                outFile << multiUSolutions_[i][j] << std::endl;
+            }
+        }
+
+        outFile.close();
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureLaplace::end_procedure(){
+    // something important to finish writing the output file
+    std::cout << "Done." << std::endl;
+}
+
+//============================================================================================================
+void SolutionProcedureLaplace::apply_step(){
+
+    // Apply individual step to solutions
+
+    multiSolutionBoundaryCondition_->enforce_boundary_conditions(multiUSolutions_, *(runtime_args_));
+
+    // loops over entries, save the one involved in the boundary condition
+    // boundary hard coded to LHS of wall
+
+
+    double c = runtime_args_->get_c(); // In this case, the nu coefficient in the equation
+    double dx = runtime_args_->get_dx();
+    double dy = runtime_args_->get_dy();
+    double dt = runtime_args_->get_dt();
+
+    // Assume the user has specified a reasonable set of conditions
+    // Else, throw a warning to the user that this has occured.
+
+    // start by looping over x-variable (space)
+
+    // save previous column in holder
+    std::vector<double> previous_col (runtime_args_->get_y_iterations(), 0.0);
+    for (unsigned int i = 0 ; i < runtime_args_->get_y_iterations(); ++i){
+        previous_col[i] = multiUSolutions_[0][i];
+    }
+
+    for (unsigned int  i = 1 ; i < runtime_args_->get_x_iterations()-1; ++i){
+        double uSolnym1 = multiUSolutions_[i][0];
+        for (unsigned int j = 1 ; j < runtime_args_->get_y_iterations()-1; ++j){
+            double uij = multiUSolutions_[i][j];
+            double uip1j = multiUSolutions_[i+1][j];
+            double uim1j = previous_col[j];
+            double uijp1 = multiUSolutions_[i][j+1];
+            double uijm1 = uSolnym1;
+            double fx = c*dt/(dx*dx);
+            double fy = c*dt/(dy*dy);
+
+            multiUSolutions_[i][j] = uij + fx * (uip1j - 2. * uij + uim1j)
+                                     + fy * (uijp1 - 2. * uij + uijm1);
+
+
+            uSolnym1 = multiUSolutions_[i][j];
+        }
+
+        //rewrite the previous_col
+        for (unsigned int j = 0 ; j < runtime_args_->get_y_iterations(); ++j){
+            previous_col[j] = multiUSolutions_[i][j];
+        }
+
+    }
+
+}
+
+//============================================================================================================
+void SolutionProcedureLaplace::set_boundary(){
+
+    multiSolutionBoundaryCondition_ = new BoxBoundaryCondition;
+
+
+    //TODO: should probably allow the user to go ahead and set what boundary condition to be used
+
+}
+
+//============================================================================================================
+void SolutionProcedureLaplace::set_init_cond(){
+
+    // hard code as wave type
+    multiSolutionInitialCondition_ = new Curvilinear;
+
+    // TODO: should probably allow the user to go ahead and set the initial condition from the control file
+
+}

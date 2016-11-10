@@ -257,6 +257,28 @@ protected:
 
 };
 
+/*
+ * Solution procedure for 2D Laplace equation
+ */
+class SolutionProcedureLaplace : public MultiDimProcedure  {
+public:
+    void apply_step();
+    void end_procedure();
+    void start_procedure(std::string& runtime_params, std::string& template_file_name);
+    void procedure(std::string& template_file_name);
+    void convert_idx_to_pos_x(unsigned int idx, double& pos);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+    void write_to_file();
+protected:
+
+    // Multi dimensional parameters
+    RuntimeParamMultiDim* runtime_args_;
+
+    void set_boundary();
+    void set_init_cond();
+
+};
+
 
 
 
