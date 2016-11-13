@@ -51,7 +51,7 @@ SolutionProcedure* SolutionProcedure::determine_solution_procedure(std::string &
         // TODO: throw some error here that prevents user from continuing
     }
 
-}
+} // Do not need this -- should be handled elsewhere
 
 //============================================================================================================
 /*

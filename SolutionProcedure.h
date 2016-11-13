@@ -29,6 +29,7 @@ protected:
     BoundaryCondition* solutionBoundaryCondition_;
     InitCond* solutionInitialCondition_;
 
+
     std::vector<double> uSolutions_;
 
     virtual void set_boundary() = 0;
