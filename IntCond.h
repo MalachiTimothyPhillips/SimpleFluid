@@ -11,82 +11,104 @@
 
 #include <vector>
 #include "RuntimeParameters.h"
+#include "FluidEquation.h"
+
+/*
+ * Forward declaration
+ */
+
+class FluidEquation;
+
+typedef std::vector<std::vector<double>> matrix;
 
 // Base class for initial condition
 class InitCond{
 public:
-    // factory to make initial conditions
-    static InitCond *make_initial_condition();
-    virtual void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo) = 0;
+    InitCond *make_initial_condition(std::string& init_cond);
+    void make_fluid_equation(std::string& equationType);
+    virtual void apply_initial_cond() = 0;
+    void convert_idx_to_pos(unsigned int idx, double& pos);
+    virtual void enforce_boundary() = 0;
+
+    void set_args(std::vector<double>& args){
+        for(unsigned int i = 0 ; i < args.size(); ++i){
+            args_[i] = args[i];
+        }
+    };
+
+    FluidEquation* fluidEquation_;
+
 protected:
+    std::vector<double> args_;
 private:
 };
 
-// Base class for multidimensional initial condition
-class MutliDimInitCond{
+// Sin Wave
+class SinWave : public InitCond{
 public:
-    // factory to make initial conditions
-    static InitCond *make_initial_condition();
-    virtual void apply_initial_cond(std::vector<std::vector<double>>& uSol, RuntimeParamMultiDim& runtime) = 0;
-protected:
-private:
-};
-
-
-/*
- * Sin wave
- */
-
-class SinWave: public InitCond{
-public:
-    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
-    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-    void sin_func(double pos, double& value);
+    void apply_initial_cond();
+    void enforce_boundary();
 protected:
 private:
 
 };
 
-/*
- * Square wave profile
- */
 
-class StepWave : public InitCond{
-public:
-    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
-    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-    void wave_func(double pos, double& value);
-
-protected:
-
-
-private:
-    //virtual ~StepWave(){};
-};
-
-/*
- * Positive Wave
- */
-
-class PositiveWave : public InitCond{
-public:
-    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
-    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-    void pos_func(double pos, double& value);
-
-protected:
-
-
-private:
-    //virtual ~StepWave(){};
-};
-
-class Curvilinear : public MutliDimInitCond{
-public:
-    void apply_initial_cond(std::vector<std::vector<double>>& uSol, RuntimeParamMultiDim& runtime);
-    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-    void pos_func(double x, double y, double& u);
-protected:
-private:
-};
+//
+///*
+// * Sin wave
+// */
+//
+//class SinWave: public InitCond{
+//public:
+//    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
+//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
+//    void sin_func(double pos, double& value);
+//protected:
+//private:
+//
+//};
+//
+///*
+// * Square wave profile
+// */
+//
+//class StepWave : public InitCond{
+//public:
+//    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
+//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
+//    void wave_func(double pos, double& value);
+//
+//protected:
+//
+//
+//private:
+//    //virtual ~StepWave(){};
+//};
+//
+///*
+// * Positive Wave
+// */
+//
+//class PositiveWave : public InitCond{
+//public:
+//    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
+//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
+//    void pos_func(double pos, double& value);
+//
+//protected:
+//
+//
+//private:
+//    //virtual ~StepWave(){};
+//};
+//
+//class Curvilinear : public MutliDimInitCond{
+//public:
+//    void apply_initial_cond(std::vector<std::vector<double>>& uSol, RuntimeParamMultiDim& runtime);
+//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
+//    void pos_func(double x, double y, double& u);
+//protected:
+//private:
+//};
 #endif //CFD_HW_INTCOND_H

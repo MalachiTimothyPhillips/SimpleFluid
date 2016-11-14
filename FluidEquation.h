@@ -11,11 +11,26 @@
 #include <boost/multi_array.hpp>
 #include <cassert>
 
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+
+///*
+// * Forwrd declarations
+//*/
+//
+//class FluidEquation;
+
 typedef std::vector<std::vector<double>> matrix;
 
+//============================================================================================================
 /*
  * Struct holding order of passed parameters, regardless if used
  */
+//============================================================================================================
 struct DOF_IDS{
     const unsigned static int lo = 0;
     const unsigned static int lf = 1;
@@ -27,6 +42,7 @@ struct DOF_IDS{
     const unsigned static int nt = 7;
     const unsigned static int c = 8;
     const unsigned static int eps = 9;
+    const unsigned static int wfreq = 10;
 };
 
 //============================================================================================================
@@ -42,8 +58,21 @@ public:
     // Constructor
     FluidEquation(std::vector<double>& args);
     virtual void apply_step() = 0; // Pure virtual, must be implemented
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+    // getters -- needed by the procedure
+    unsigned int get_nt(){return nt_;};
+    unsigned int get_nl(){return nl_;};
+    double get_lo(){return lo_;};
+    double get_dx(){return dx_;};
+    double get_lf(){return lf_;};
+
+    // 1D Solutions vector
+    std::vector<double> uSolutions_;
+
 protected:
     // Base class does not include solutions (difference between 1D and 2D equations)
+
 
     // Data shared by all solution procedures
     double lo_;
@@ -67,9 +96,10 @@ public:
         // Resize uSolutions_ to appropriate size
         uSolutions_.assign(nl_, 0.0);
     }
+    void write_to_file(std::string& template_file_name, unsigned int currentStep); // write to file, perhaps plot?
+    void convert_idx_to_pos(unsigned int idx, double& pos);
 
 protected:
-    std::vector<double> uSolutions_; // 1D solutions vector
 
 private:
 };
@@ -83,6 +113,7 @@ class LinearWaveEquation : public OneDimFluidEquation{
 public:
     // constructor
     LinearWaveEquation(std::vector<double>&args) : OneDimFluidEquation(args){
+        std::cout << "Does it ever reach this bit?" << std::endl;
         c_ = args[DOF_IDS::c];
         tf_ = args[DOF_IDS::tf];
 
@@ -110,8 +141,12 @@ private:
 class UpwindLinWave : public LinearWaveEquation{
 public:
     // constructor
-    UpwindLinWave(std::vector<double>& args) : LinearWaveEquation(args){}
+    UpwindLinWave(std::vector<double>& args) : LinearWaveEquation(args){
+        std::cout << "How about here?" << std::endl;
+    }
+
     void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
 protected:
 private:
 };
@@ -153,6 +188,7 @@ public:
     // constructor
     DiffusionEquationFTCS(std::vector<double>&args) : DiffusionEquation(args) {}
     void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
 
 protected:
 private:
@@ -190,6 +226,7 @@ public:
     // constructor
     BurgerEquationFTCS(std::vector<double>&args) : BurgerEquation(args) {}
     void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
 
 protected:
 
@@ -225,47 +262,49 @@ class ViscousBurgerEquationFTCS : public ViscousBurgerEquation{
 public:
     // constructor
     ViscousBurgerEquationFTCS(std::vector<double>&args) : ViscousBurgerEquation(args) {}
+    void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
 
 protected:
 private:
 };
 
 
-//============================================================================================================
-/*
- * Base class for two dimensional problems
- */
-//============================================================================================================
-class TwoDimFluidEquation : public FluidEquation{
-public:
-    // constructor
-    TwoDimFluidEquation(std::vector<double>& args);
-
-protected:
-    matrix uSolutions_; // 2D solutions matrix
-
-    // Data needed for all 2D test problems
-    double ho_;
-    double hf_;
-    unsigned int nh_;
-    double dy_;
-
-private:
-};
-
-//============================================================================================================
-/*
- * Base class for 2D linear advection equation
- */
-//============================================================================================================
-class TwoDimLinAdvectionEquation : public TwoDimFluidEquation{
-public:
-    // constructor
-    TwoDimLinAdvectionEquation(std::vector<double>& args) : TwoDimFluidEquation(args){}
-
-protected:
-private:
-
-};
+////============================================================================================================
+///*
+// * Base class for two dimensional problems
+// */
+////============================================================================================================
+//class TwoDimFluidEquation : public FluidEquation{
+//public:
+//    // constructor
+//    TwoDimFluidEquation(std::vector<double>& args);
+//
+//protected:
+//    matrix uSolutions_; // 2D solutions matrix
+//
+//    // Data needed for all 2D test problems
+//    double ho_;
+//    double hf_;
+//    unsigned int nh_;
+//    double dy_;
+//
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * Base class for 2D linear advection equation
+// */
+////============================================================================================================
+//class TwoDimLinAdvectionEquation : public TwoDimFluidEquation{
+//public:
+//    // constructor
+//    TwoDimLinAdvectionEquation(std::vector<double>& args) : TwoDimFluidEquation(args){}
+//
+//protected:
+//private:
+//
+//};
 
 #endif //CFD_HW_FLUIDEQUATION_H

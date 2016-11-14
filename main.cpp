@@ -25,20 +25,12 @@ int main(int argc, char *argv[]) {
     std::string whichPDE = argv[1];
 
     // Set PDE Type in SolutionProcedure
-    SolutionProcedure* currentProcedure = SolutionProcedure::determine_solution_procedure(whichPDE);
-
+    SolutionProcedure* currentProcedure = new SolutionProcedure;
     // create output file
     std::string userOutputFile = argv[3];
-
     // pass from command line the filename to be used for procedure
     std::string userRuntimeArguments = argv[2];
-    currentProcedure->start_procedure(userRuntimeArguments, userOutputFile);
-
-
-
-
-
-
+    currentProcedure->start_procedure(userRuntimeArguments, userOutputFile, whichPDE);
 
     return 0;
 }
