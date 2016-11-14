@@ -20,36 +20,22 @@
 void SolutionProcedure::start_procedure(std::string& runtime_params, std::string& template_file_name, std::string& whichPDE ){
     // Universal parser
 
-    std::cout << "Parser" << std::endl;
-
     RuntimeParser* runtime = new RuntimeParser;
     runtime->read_parameters_from_file(runtime_params);
-
-    std::cout << "Flag" << std::endl;
 
     solutionInitialCondition_->set_args(runtime->return_args());
     std::string condition;
     condition = runtime->return_cond();
 
-    std::cout << "Initial condition found" << std::endl;
-
     solutionInitialCondition_ = solutionInitialCondition_->make_initial_condition(condition);
 
-    std::cout << "Condition made?" << std::endl;
-
-    solutionInitialCondition_->make_fluid_equation(whichPDE);
-
-    std::cout << "Fluid equation" << std::endl;
+    solutionInitialCondition_->fluidEquation_ = solutionInitialCondition_->make_fluid_equation(whichPDE);
 
     solutionInitialCondition_->apply_initial_cond();
     solutionInitialCondition_->enforce_boundary();
 
-    std::cout << "Equation, intial conditions handled correctly" << std::endl;
-
     // execute procedure
     procedure(template_file_name);
-
-    std::cout << "After procedure. " << std::endl;
 
     // end procedure
     end_procedure();

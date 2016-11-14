@@ -25,7 +25,7 @@ typedef std::vector<std::vector<double>> matrix;
 class InitCond{
 public:
     InitCond *make_initial_condition(std::string& init_cond);
-    void make_fluid_equation(std::string& equationType);
+    FluidEquation* make_fluid_equation(std::string& equationType);
     virtual void apply_initial_cond() = 0;
     void convert_idx_to_pos(unsigned int idx, double& pos);
     virtual void enforce_boundary() = 0;

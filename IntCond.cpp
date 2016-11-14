@@ -23,12 +23,12 @@ InitCond* InitCond::make_initial_condition(std::string& init_cond)
 }
 
 //Factory
-void InitCond::make_fluid_equation(std::string &equationType) {
+FluidEquation* InitCond::make_fluid_equation(std::string &equationType) {
 
     std::cout << "Reach here?" << std::endl;
     if(equationType == "UpwindLinWave"){
         std::cout << "Inside comparison" << std::endl;
-        fluidEquation_ = new UpwindLinWave(args_);
+        return new UpwindLinWave(args_);
     }
 
     std::cout << "Handled it correctly" << std::endl;
