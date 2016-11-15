@@ -30,6 +30,8 @@ public:
     void convert_idx_to_pos(unsigned int idx, double& pos);
     virtual void enforce_boundary() = 0;
 
+    std::vector<double>& return_args(){return args_;};
+
     void set_args(std::vector<double>& args){
         for(unsigned int i = 0 ; i < args.size(); ++i){
             args_[i] = args[i];

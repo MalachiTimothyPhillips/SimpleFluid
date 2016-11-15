@@ -29,7 +29,9 @@ void SolutionProcedure::start_procedure(std::string& runtime_params, std::string
 
     solutionInitialCondition_ = solutionInitialCondition_->make_initial_condition(condition);
 
-    solutionInitialCondition_->fluidEquation_ = solutionInitialCondition_->make_fluid_equation(whichPDE);
+    std::vector<double> args = solutionInitialCondition_->return_args();
+    solutionInitialCondition_->fluidEquation_ =
+            solutionInitialCondition_->fluidEquation_->make_fluid_equation(whichPDE, args);
 
     solutionInitialCondition_->apply_initial_cond();
     solutionInitialCondition_->enforce_boundary();

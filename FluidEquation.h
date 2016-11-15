@@ -50,13 +50,14 @@ struct DOF_IDS{
  *
  * An equation holds information about the PDE and the method of solution
  * ie. ut + cux = 0 is a PDE, but has several methods of being solved
- * Each method would have its own equation (althought they can easily borrow off others)
+ * Each method would have its own equation (although they can easily borrow off others)
  */
 //============================================================================================================
 class FluidEquation{
 public:
     // Constructor
     FluidEquation(std::vector<double>& args);
+    FluidEquation* make_fluid_equation(std::string &equationType, std::vector<double>& args);
     virtual void apply_step() = 0; // Pure virtual, must be implemented
     void write_to_file(std::string& template_file_name, unsigned int currentStep);
 
@@ -67,7 +68,6 @@ public:
     double get_dx(){return dx_;};
     double get_lf(){return lf_;};
 
-    // 1D Solutions vector
     std::vector<double> uSolutions_;
 
 protected:
@@ -92,14 +92,13 @@ private:
 class OneDimFluidEquation : public FluidEquation{
 public:
     // Constructor
-    OneDimFluidEquation(std::vector<double>& args) : FluidEquation(args) {
-        // Resize uSolutions_ to appropriate size
-        uSolutions_.assign(nl_, 0.0);
-    }
+    OneDimFluidEquation(std::vector<double>& args);
     void write_to_file(std::string& template_file_name, unsigned int currentStep); // write to file, perhaps plot?
     void convert_idx_to_pos(unsigned int idx, double& pos);
 
 protected:
+
+//    std::vector<double> uSolutions_;
 
 private:
 };
@@ -112,16 +111,7 @@ private:
 class LinearWaveEquation : public OneDimFluidEquation{
 public:
     // constructor
-    LinearWaveEquation(std::vector<double>&args) : OneDimFluidEquation(args){
-        std::cout << "Does it ever reach this bit?" << std::endl;
-        c_ = args[DOF_IDS::c];
-        tf_ = args[DOF_IDS::tf];
-
-        // Calculate the dt, CFL
-        dt_ = tf_ / (double) nt_;
-        CFL_ = c_*dt_/dx_;
-    }
-
+    LinearWaveEquation(std::vector<double>&args);
 protected:
 
     // Data needed for linear wave equation
@@ -141,9 +131,7 @@ private:
 class UpwindLinWave : public LinearWaveEquation{
 public:
     // constructor
-    UpwindLinWave(std::vector<double>& args) : LinearWaveEquation(args){
-        std::cout << "How about here?" << std::endl;
-    }
+    UpwindLinWave(std::vector<double>& args);
 
     void apply_step();
     void write_to_file(std::string& template_file_name, unsigned int currentStep);
@@ -151,123 +139,123 @@ protected:
 private:
 };
 
-//============================================================================================================
-/*
- * One dimensional diffusion equation - base case
- */
-//============================================================================================================
-class DiffusionEquation : public OneDimFluidEquation{
-public:
-    // constructor
-    DiffusionEquation(std::vector<double>&args) : OneDimFluidEquation(args) {
-        nu_ = args[DOF_IDS::c];
-        tf_ = args[DOF_IDS::tf];
-        dt_ = tf_/(double) nt_;
-        // Compute alpha
-        alpha_ = nu_*dt_/dx_/dx_;
-    }
-
-protected:
-
-    // Data needed for linear wave equation
-    double nu_;
-    double tf_;
-    double dt_;
-    double alpha_;
-
-private:
-};
-
-//============================================================================================================
-/*
- * DiffusionEquation, solve by FTCS
- */
-//============================================================================================================
-class DiffusionEquationFTCS : public DiffusionEquation{
-public:
-    // constructor
-    DiffusionEquationFTCS(std::vector<double>&args) : DiffusionEquation(args) {}
-    void apply_step();
-    void write_to_file(std::string& template_file_name, unsigned int currentStep);
-
-protected:
-private:
-};
-
-//============================================================================================================
-/*
- * One dimensional burger equation, base class
- */
-//============================================================================================================
-class BurgerEquation : public OneDimFluidEquation{
-public:
-    // constructor
-    BurgerEquation(std::vector<double>&args) : OneDimFluidEquation(args) {
-        eps_ = args[DOF_IDS::eps];
-    }
-
-protected:
-
-    // Data needed for linear wave equation
-    double dt_;
-    double eps_;
-    double T_ = 0;
-
-private:
-};
-
-//============================================================================================================
-/*
- * One dimensional burger equation, FTCS
- */
-//============================================================================================================
-class BurgerEquationFTCS : public BurgerEquation{
-public:
-    // constructor
-    BurgerEquationFTCS(std::vector<double>&args) : BurgerEquation(args) {}
-    void apply_step();
-    void write_to_file(std::string& template_file_name, unsigned int currentStep);
-
-protected:
-
-private:
-};
-
-//============================================================================================================
-/*
- * One dimensional viscous burger equation, base class
- */
-//============================================================================================================
-class ViscousBurgerEquation : public OneDimFluidEquation{
-public:
-    // constructor
-    ViscousBurgerEquation(std::vector<double>&args) : OneDimFluidEquation(args) {}
-
-protected:
-
-    // Data needed for linear wave equation
-    double nu_;
-    double dt_;
-    double eps_;
-
-private:
-};
-
-//============================================================================================================
-/*
- * One dimensional viscous burger equation, FTCS
- */
-//============================================================================================================
-class ViscousBurgerEquationFTCS : public ViscousBurgerEquation{
-public:
-    // constructor
-    ViscousBurgerEquationFTCS(std::vector<double>&args) : ViscousBurgerEquation(args) {}
-    void apply_step();
-    void write_to_file(std::string& template_file_name, unsigned int currentStep);
-
-protected:
-private:
-};
+////============================================================================================================
+///*
+// * One dimensional diffusion equation - base case
+// */
+////============================================================================================================
+//class DiffusionEquation : public OneDimFluidEquation{
+//public:
+//    // constructor
+//    DiffusionEquation(std::vector<double>&args);// : OneDimFluidEquation(args) {
+////        nu_ = args[DOF_IDS::c];
+////        tf_ = args[DOF_IDS::tf];
+////        dt_ = tf_/(double) nt_;
+////        // Compute alpha
+////        alpha_ = nu_*dt_/dx_/dx_;
+////    }
+//
+//protected:
+//
+//    // Data needed for linear wave equation
+//    double nu_;
+//    double tf_;
+//    double dt_;
+//    double alpha_;
+//
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * DiffusionEquation, solve by FTCS
+// */
+////============================================================================================================
+//class DiffusionEquationFTCS : public DiffusionEquation{
+//public:
+//    // constructor
+//    DiffusionEquationFTCS(std::vector<double>&args);// : DiffusionEquation(args) {}
+//    void apply_step();
+//    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+//
+//protected:
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * One dimensional burger equation, base class
+// */
+////============================================================================================================
+//class BurgerEquation : public OneDimFluidEquation{
+//public:
+//    // constructor
+//    BurgerEquation(std::vector<double>&args);// : OneDimFluidEquation(args) {
+////        eps_ = args[DOF_IDS::eps];
+////    }
+//
+//protected:
+//
+//    // Data needed for linear wave equation
+//    double dt_;
+//    double eps_;
+//    double T_ = 0;
+//
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * One dimensional burger equation, FTCS
+// */
+////============================================================================================================
+//class BurgerEquationFTCS : public BurgerEquation{
+//public:
+//    // constructor
+//    BurgerEquationFTCS(std::vector<double>&args);// : BurgerEquation(args) {}
+//    void apply_step();
+//    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+//
+//protected:
+//
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * One dimensional viscous burger equation, base class
+// */
+////============================================================================================================
+//class ViscousBurgerEquation : public OneDimFluidEquation{
+//public:
+//    // constructor
+//    ViscousBurgerEquation(std::vector<double>&args);// : OneDimFluidEquation(args) {}
+//
+//protected:
+//
+//    // Data needed for linear wave equation
+//    double nu_;
+//    double dt_;
+//    double eps_;
+//
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * One dimensional viscous burger equation, FTCS
+// */
+////============================================================================================================
+//class ViscousBurgerEquationFTCS : public ViscousBurgerEquation{
+//public:
+//    // constructor
+//    ViscousBurgerEquationFTCS(std::vector<double>&args);// : ViscousBurgerEquation(args) {}
+//    void apply_step();
+//    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+//
+//protected:
+//private:
+//};
 
 
 ////============================================================================================================

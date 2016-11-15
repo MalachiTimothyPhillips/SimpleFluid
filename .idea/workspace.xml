@@ -12,7 +12,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3cf72f63-205a-41ec-bcb3-5bc56d8a00f6" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IntCond.cpp" afterPath="$PROJECT_DIR$/IntCond.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/FluidEquation.cpp" afterPath="$PROJECT_DIR$/FluidEquation.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/FluidEquation.h" afterPath="$PROJECT_DIR$/FluidEquation.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IntCond.h" afterPath="$PROJECT_DIR$/IntCond.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SolutionProcedure.cpp" afterPath="$PROJECT_DIR$/SolutionProcedure.cpp" />
     </list>
@@ -51,8 +53,8 @@
       <file leaf-file-name="IntCond.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/IntCond.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="35" column="9" selection-start-line="35" selection-start-column="9" selection-end-line="35" selection-end-column="9" />
+            <state relative-caret-position="315">
+              <caret line="37" column="9" selection-start-line="37" selection-start-column="9" selection-end-line="37" selection-end-column="9" />
               <folding>
                 <element signature="e#160#177#0" expanded="true" />
               </folding>
@@ -97,7 +99,7 @@
       <file leaf-file-name="SolutionProcedure.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SolutionProcedure.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
+            <state relative-caret-position="292">
               <caret line="26" column="2" selection-start-line="26" selection-start-column="2" selection-end-line="26" selection-end-column="2" />
               <folding>
                 <element signature="e#121#138#0" expanded="true" />
@@ -109,8 +111,8 @@
       <file leaf-file-name="FluidEquation.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/FluidEquation.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1095">
-              <caret line="73" column="24" selection-start-line="73" selection-start-column="24" selection-end-line="73" selection-end-column="24" />
+            <state relative-caret-position="-455">
+              <caret line="61" column="30" selection-start-line="61" selection-start-column="30" selection-end-line="61" selection-end-column="30" />
               <folding>
                 <element signature="e#51#77#0" expanded="true" />
               </folding>
@@ -121,28 +123,28 @@
       <file leaf-file-name="SolutionProcedure.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SolutionProcedure.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="34" column="50" selection-start-line="34" selection-start-column="50" selection-end-line="34" selection-end-column="50" />
+            <state relative-caret-position="285">
+              <caret line="35" column="52" selection-start-line="35" selection-start-column="52" selection-end-line="35" selection-end-column="52" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FluidEquation.h" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FluidEquation.h" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/FluidEquation.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2040">
-              <caret line="42" column="36" selection-start-line="42" selection-start-column="36" selection-end-line="42" selection-end-column="36" />
+            <state relative-caret-position="1230">
+              <caret line="94" column="51" selection-start-line="94" selection-start-column="51" selection-end-line="94" selection-end-column="51" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="IntCond.cpp" pinned="false" current-in-tab="true">
+      <file leaf-file-name="IntCond.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/IntCond.cpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="255">
-              <caret line="34" column="1" selection-start-line="34" selection-start-column="1" selection-end-line="34" selection-end-column="1" />
+              <caret line="35" column="0" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
               <folding>
                 <element signature="e#50#70#0" expanded="true" />
               </folding>
@@ -174,11 +176,11 @@
         <option value="$PROJECT_DIR$/BoundaryCond.cpp" />
         <option value="$PROJECT_DIR$/BoundaryCond.h" />
         <option value="$PROJECT_DIR$/RuntimeParameters.cpp" />
-        <option value="$PROJECT_DIR$/FluidEquation.h" />
-        <option value="$PROJECT_DIR$/FluidEquation.cpp" />
-        <option value="$PROJECT_DIR$/IntCond.h" />
         <option value="$PROJECT_DIR$/IntCond.cpp" />
+        <option value="$PROJECT_DIR$/IntCond.h" />
         <option value="$PROJECT_DIR$/SolutionProcedure.cpp" />
+        <option value="$PROJECT_DIR$/FluidEquation.cpp" />
+        <option value="$PROJECT_DIR$/FluidEquation.h" />
       </list>
     </option>
   </component>
@@ -190,9 +192,9 @@
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds">
-    <option name="x" value="52" />
+    <option name="x" value="16" />
     <option name="y" value="22" />
-    <option name="width" value="1228" />
+    <option name="width" value="1210" />
     <option name="height" value="723" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
@@ -489,18 +491,18 @@
       <workItem from="1479015123121" duration="3422000" />
       <workItem from="1479064842172" duration="13699000" />
       <workItem from="1479098683651" duration="5420000" />
-      <workItem from="1479164257696" duration="386000" />
+      <workItem from="1479164257696" duration="4258000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="143392000" />
+    <option name="totallyTimeSpent" value="147264000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="52" y="22" width="1228" height="723" extended-state="0" />
+    <frame x="16" y="22" width="1210" height="723" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21824104" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2214876" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25382262" sideWeight="0.41729012" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -509,7 +511,7 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.48379052" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.15749235" sideWeight="0.48379052" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -534,7 +536,14 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="20" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/IntCond.cpp</url>
+          <line>29</line>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="27" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -862,7 +871,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/SolutionProcedure.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
+        <state relative-caret-position="292">
           <caret line="26" column="2" selection-start-line="26" selection-start-column="2" selection-end-line="26" selection-end-column="2" />
           <folding>
             <element signature="e#121#138#0" expanded="true" />
@@ -870,28 +879,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/FluidEquation.h">
+    <entry file="file://$PROJECT_DIR$/IntCond.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2040">
-          <caret line="42" column="36" selection-start-line="42" selection-start-column="36" selection-end-line="42" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/FluidEquation.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1095">
-          <caret line="73" column="24" selection-start-line="73" selection-start-column="24" selection-end-line="73" selection-end-column="24" />
+        <state relative-caret-position="255">
+          <caret line="35" column="0" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
           <folding>
-            <element signature="e#51#77#0" expanded="true" />
+            <element signature="e#50#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/IntCond.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="35" column="9" selection-start-line="35" selection-start-column="9" selection-end-line="35" selection-end-column="9" />
+        <state relative-caret-position="315">
+          <caret line="37" column="9" selection-start-line="37" selection-start-column="9" selection-end-line="37" selection-end-column="9" />
           <folding>
             <element signature="e#160#177#0" expanded="true" />
           </folding>
@@ -900,19 +901,27 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/SolutionProcedure.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="34" column="50" selection-start-line="34" selection-start-column="50" selection-end-line="34" selection-end-column="50" />
+        <state relative-caret-position="285">
+          <caret line="35" column="52" selection-start-line="35" selection-start-column="52" selection-end-line="35" selection-end-column="52" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/IntCond.cpp">
+    <entry file="file://$PROJECT_DIR$/FluidEquation.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="34" column="1" selection-start-line="34" selection-start-column="1" selection-end-line="34" selection-end-column="1" />
+        <state relative-caret-position="-455">
+          <caret line="61" column="30" selection-start-line="61" selection-start-column="30" selection-end-line="61" selection-end-column="30" />
           <folding>
-            <element signature="e#50#70#0" expanded="true" />
+            <element signature="e#51#77#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/FluidEquation.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1230">
+          <caret line="94" column="51" selection-start-line="94" selection-start-column="51" selection-end-line="94" selection-end-column="51" />
+          <folding />
         </state>
       </provider>
     </entry>
