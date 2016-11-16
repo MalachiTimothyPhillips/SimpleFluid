@@ -34,6 +34,21 @@ FluidEquation* InitCond::make_fluid_equation(std::string &equationType) {
     std::cout << "Handled it correctly" << std::endl;
 }
 
+void InitCond::set_args() {
+    args_.resize(11);
+    std::cout << "Success" << std::endl;
+//    for (unsigned int i = 0; i < args.size(); ++i) {
+//        std::cout << args.size() << std::endl;
+//        std::cout << args_.size() << std::endl;
+//        std::cout << args[i] << std::endl;
+//        args_.push_back((args[i]));// = args[i];
+//        //args_[i] = args[i];
+//        std::cout << args[i] << std::endl;
+//        std::cout << "Did it work?" << std::endl;
+//
+//    }
+}
+
 void InitCond::convert_idx_to_pos(unsigned int idx, double &pos) {
     pos = (double)idx * fluidEquation_->get_dx() + fluidEquation_->get_lo();
 }

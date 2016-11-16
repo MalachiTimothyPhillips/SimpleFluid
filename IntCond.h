@@ -13,6 +13,14 @@
 #include "RuntimeParameters.h"
 #include "FluidEquation.h"
 
+
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+
 /*
  * Forward declaration
  */
@@ -32,16 +40,12 @@ public:
 
     std::vector<double>& return_args(){return args_;};
 
-    void set_args(std::vector<double>& args){
-        for(unsigned int i = 0 ; i < args.size(); ++i){
-            args_[i] = args[i];
-        }
-    };
+    void set_args();
 
     FluidEquation* fluidEquation_;
 
 protected:
-    std::vector<double> args_;
+    std::vector<double> args_;// = std::vector<double>(11); //pre-determined size
 private:
 };
 

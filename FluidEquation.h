@@ -60,6 +60,7 @@ public:
     FluidEquation* make_fluid_equation(std::string &equationType, std::vector<double>& args);
     virtual void apply_step() = 0; // Pure virtual, must be implemented
     void write_to_file(std::string& template_file_name, unsigned int currentStep);
+    void convert_idx_to_pos(unsigned int idx, double &pos);
 
     // getters -- needed by the procedure
     unsigned int get_nt(){return nt_;};
@@ -84,51 +85,51 @@ protected:
 private:
 };
 
-//============================================================================================================
-/*
- * One dimensional equations base class
- */
-//============================================================================================================
-class OneDimFluidEquation : public FluidEquation{
-public:
-    // Constructor
-    OneDimFluidEquation(std::vector<double>& args);
-    void write_to_file(std::string& template_file_name, unsigned int currentStep); // write to file, perhaps plot?
-    void convert_idx_to_pos(unsigned int idx, double& pos);
-
-protected:
-
-//    std::vector<double> uSolutions_;
-
-private:
-};
-
-//============================================================================================================
-/*
- * One dimensional linear wave equation -- base class
- */
-//============================================================================================================
-class LinearWaveEquation : public OneDimFluidEquation{
-public:
-    // constructor
-    LinearWaveEquation(std::vector<double>&args);
-protected:
-
-    // Data needed for linear wave equation
-    double c_;
-    double tf_;
-    double dt_;
-    double CFL_;
-
-private:
-};
+////============================================================================================================
+///*
+// * One dimensional equations base class
+// */
+////============================================================================================================
+//class OneDimFluidEquation : public FluidEquation{
+//public:
+//    // Constructor
+//    OneDimFluidEquation(std::vector<double>& args);
+//    void write_to_file(std::string& template_file_name, unsigned int currentStep); // write to file, perhaps plot?
+//    void convert_idx_to_pos(unsigned int idx, double& pos);
+//
+//protected:
+//
+////    std::vector<double> uSolutions_;
+//
+//private:
+//};
+//
+////============================================================================================================
+///*
+// * One dimensional linear wave equation -- base class
+// */
+////============================================================================================================
+//class LinearWaveEquation : public OneDimFluidEquation{
+//public:
+//    // constructor
+//    LinearWaveEquation(std::vector<double>&args);
+//protected:
+//
+//    // Data needed for linear wave equation
+//    double c_;
+//    double tf_;
+//    double dt_;
+//    double CFL_;
+//
+//private:
+//};
 
 //============================================================================================================
 /*
  * One dimensional linear advection equation solved by upwind/downwind FTBS/FTFS method (first ordr)
  */
 //============================================================================================================
-class UpwindLinWave : public LinearWaveEquation{
+class UpwindLinWave : public FluidEquation{
 public:
     // constructor
     UpwindLinWave(std::vector<double>& args);
@@ -136,6 +137,12 @@ public:
     void apply_step();
     void write_to_file(std::string& template_file_name, unsigned int currentStep);
 protected:
+
+    // Data needed for linear wave equation
+    double c_;
+    double tf_;
+    double dt_;
+    double CFL_;
 private:
 };
 

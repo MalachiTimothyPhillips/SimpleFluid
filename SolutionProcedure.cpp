@@ -22,16 +22,16 @@ void SolutionProcedure::start_procedure(std::string& runtime_params, std::string
 
     RuntimeParser* runtime = new RuntimeParser;
     runtime->read_parameters_from_file(runtime_params);
+    std::vector<double> myArgs;
+    myArgs = runtime->return_args();
 
-    solutionInitialCondition_->set_args(runtime->return_args());
     std::string condition;
     condition = runtime->return_cond();
 
     solutionInitialCondition_ = solutionInitialCondition_->make_initial_condition(condition);
 
-    std::vector<double> args = solutionInitialCondition_->return_args();
     solutionInitialCondition_->fluidEquation_ =
-            solutionInitialCondition_->fluidEquation_->make_fluid_equation(whichPDE, args);
+            solutionInitialCondition_->fluidEquation_->make_fluid_equation(whichPDE, myArgs);
 
     solutionInitialCondition_->apply_initial_cond();
     solutionInitialCondition_->enforce_boundary();

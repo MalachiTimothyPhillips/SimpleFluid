@@ -43,7 +43,6 @@ void RuntimeParser::read_parameters_from_file(std::string &runtime_file) {
         // should throw runtime error here
     }
     std::string currentLine;
-    std::vector<double> args;
     unsigned int i = 0;
     // iterate over lines of file
     while(std::getline(myInputFile,currentLine)){
@@ -51,7 +50,7 @@ void RuntimeParser::read_parameters_from_file(std::string &runtime_file) {
             // string to double conversion
             double valueFromFile = std::stod(currentLine);
             // write current value to holder
-            args.push_back(valueFromFile); //convert type afterward
+            args_.push_back(valueFromFile); //convert type afterward
         }
         if (i >= 11){
             initialCondition_ = currentLine;

@@ -15,8 +15,14 @@
  */
 //============================================================================================================
 FluidEquation::FluidEquation(std::vector<double> &args) {
+    std::cout << "Does it ever reach here?" << std::endl;
+    std::cout << DOF_IDS::lo << std::endl;
     lo_ = args[DOF_IDS::lo];
+    std::cout << "Work?" << std::endl;
+
     lf_ = args[DOF_IDS::lf];
+    std::cout << "Check?" << std::endl;
+
     nl_ = (unsigned int) args[DOF_IDS::nl];
     nt_ = (unsigned int) args[DOF_IDS::nt];
 
@@ -26,7 +32,15 @@ FluidEquation::FluidEquation(std::vector<double> &args) {
 } // constructor
 //-----------------------------------------------------------------------------------------------------------
 void FluidEquation::write_to_file(std::string& template_file_name, unsigned int currentStep){
-
+ //Write current time step to the file
+    std::ofstream outFile(template_file_name + std::to_string(currentStep));
+    for (unsigned int i = 0; i < uSolutions_.size(); ++i) {
+        double pos;
+        convert_idx_to_pos(i, pos);
+        outFile << pos << " ";
+        outFile << uSolutions_[i] << std::endl;
+    } // writes file in two column format: x and u(x)
+    outFile.close();
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -40,51 +54,56 @@ FluidEquation* FluidEquation::make_fluid_equation(std::string& equationType, std
     std::cout << "Handled it correctly" << std::endl;
 }
 
-//============================================================================================================
-/*
- * One dimensional fluid equation base class
- */
-//============================================================================================================
-
-OneDimFluidEquation::OneDimFluidEquation(std::vector<double>& args) : FluidEquation(args){
-        std::cout << "How about here?" << std::endl;
-        // Resize uSolutions_ to appropriate size
-        uSolutions_.assign(nl_, 0.0);
-} //  constructor
-
 //-----------------------------------------------------------------------------------------------------------
-void OneDimFluidEquation::write_to_file(std::string &template_file_name, unsigned int currentStep) {
-    // Write current time step to the file
-    std::ofstream outFile(template_file_name + std::to_string(currentStep));
-    for (unsigned int i = 0; i < uSolutions_.size(); ++i) {
-        double pos;
-        convert_idx_to_pos(i, pos);
-        outFile << pos << " ";
-        outFile << uSolutions_[i] << std::endl;
-    } // writes file in two column format: x and u(x)
-    outFile.close();
-}
-
-//-----------------------------------------------------------------------------------------------------------
-void OneDimFluidEquation::convert_idx_to_pos(unsigned int idx, double &pos) {
+void FluidEquation::convert_idx_to_pos(unsigned int idx, double &pos) {
     pos = (double) idx * dx_ + lo_;
 }
 
-//============================================================================================================
-/*
- * Linear Wave Equation Base Class
- */
-//============================================================================================================
-
-LinearWaveEquation::LinearWaveEquation(std::vector<double>&args) : OneDimFluidEquation(args){
-    std::cout << "Does it ever reach this bit?" << std::endl;
-    c_ = args[DOF_IDS::c];
-    tf_ = args[DOF_IDS::tf];
-
-    // Calculate the dt, CFL
-    dt_ = tf_ / (double) nt_;
-    CFL_ = c_*dt_/dx_;
-}
+////============================================================================================================
+///*
+// * One dimensional fluid equation base class
+// */
+////============================================================================================================
+//
+//OneDimFluidEquation::OneDimFluidEquation(std::vector<double>& args) : FluidEquation(args){
+//        std::cout << "How about here?" << std::endl;
+//        // Resize uSolutions_ to appropriate size
+//        uSolutions_.assign(nl_, 0.0);
+//} //  constructor
+//
+////-----------------------------------------------------------------------------------------------------------
+//void OneDimFluidEquation::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+//    // Write current time step to the file
+//    std::ofstream outFile(template_file_name + std::to_string(currentStep));
+//    for (unsigned int i = 0; i < uSolutions_.size(); ++i) {
+//        double pos;
+//        convert_idx_to_pos(i, pos);
+//        outFile << pos << " ";
+//        outFile << uSolutions_[i] << std::endl;
+//    } // writes file in two column format: x and u(x)
+//    outFile.close();
+//}
+//
+////-----------------------------------------------------------------------------------------------------------
+//void OneDimFluidEquation::convert_idx_to_pos(unsigned int idx, double &pos) {
+//    pos = (double) idx * dx_ + lo_;
+//}
+//
+////============================================================================================================
+///*
+// * Linear Wave Equation Base Class
+// */
+////============================================================================================================
+//
+//LinearWaveEquation::LinearWaveEquation(std::vector<double>&args) : OneDimFluidEquation(args){
+//    std::cout << "Does it ever reach this bit?" << std::endl;
+//    c_ = args[DOF_IDS::c];
+//    tf_ = args[DOF_IDS::tf];
+//
+//    // Calculate the dt, CFL
+//    dt_ = tf_ / (double) nt_;
+//    CFL_ = c_*dt_/dx_;
+//}
 
 //============================================================================================================
 /*
@@ -92,8 +111,16 @@ LinearWaveEquation::LinearWaveEquation(std::vector<double>&args) : OneDimFluidEq
  */
 //============================================================================================================
 
-UpwindLinWave::UpwindLinWave(std::vector<double>& args) : LinearWaveEquation(args){
+UpwindLinWave::UpwindLinWave(std::vector<double>& args) : FluidEquation(args){
     std::cout << "How about here?" << std::endl;
+    // Resize uSolutions_ to appropriate size
+    uSolutions_.assign(nl_, 0.0);
+    c_ = args[DOF_IDS::c];
+    tf_ = args[DOF_IDS::tf];
+
+    // Calculate the dt, CFL
+    dt_ = tf_ / (double) nt_;
+    CFL_ = c_*dt_/dx_;
 }
 
 //------------------------------------------------------------------------------------------------------------
@@ -117,7 +144,7 @@ void UpwindLinWave::apply_step() {
 
 //------------------------------------------------------------------------------------------------------------
 void UpwindLinWave::write_to_file(std::string &template_file_name, unsigned int currentStep) {
-    OneDimFluidEquation::write_to_file(template_file_name, currentStep);
+    FluidEquation::write_to_file(template_file_name, currentStep);
 }
 
 ////============================================================================================================
