@@ -32,26 +32,31 @@ typedef std::vector<std::vector<double>> matrix;
 // Base class for initial condition
 class InitCond{
 public:
-    InitCond *make_initial_condition(std::string& init_cond);
-    FluidEquation* make_fluid_equation(std::string& equationType);
+
+    InitCond(std::vector<double>& args);
+
+    InitCond *make_initial_condition(std::string& init_cond, std::vector<double>& args);
     virtual void apply_initial_cond() = 0;
     void convert_idx_to_pos(unsigned int idx, double& pos);
     virtual void enforce_boundary() = 0;
 
-    std::vector<double>& return_args(){return args_;};
-
-    void set_args();
-
     FluidEquation* fluidEquation_;
 
 protected:
-    std::vector<double> args_;// = std::vector<double>(11); //pre-determined size
+
+    // Initial condition (constructed via std::vector<double>& args) should always have these base parameters
+    double lo_;
+    unsigned int nl_;
+    double dx_;
+    double lf_;
+
 private:
 };
 
 // Sin Wave
 class SinWave : public InitCond{
 public:
+    SinWave(std::vector<double>& args);
     void apply_initial_cond();
     void enforce_boundary();
 protected:
@@ -59,62 +64,41 @@ private:
 
 };
 
+// 2D stepwave at 0
+class Curvilinear : public InitCond{
+public:
+    Curvilinear(std::vector<double>& args);
+    void apply_initial_cond();
+    void enforce_boundary();
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+    void pos_func(double x, double y, double& u);
+protected:
 
-//
-///*
-// * Sin wave
-// */
-//
-//class SinWave: public InitCond{
-//public:
-//    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
-//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-//    void sin_func(double pos, double& value);
-//protected:
-//private:
-//
-//};
-//
-///*
-// * Square wave profile
-// */
-//
-//class StepWave : public InitCond{
-//public:
-//    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
-//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-//    void wave_func(double pos, double& value);
-//
-//protected:
-//
-//
-//private:
-//    //virtual ~StepWave(){};
-//};
-//
-///*
-// * Positive Wave
-// */
-//
-//class PositiveWave : public InitCond{
-//public:
-//    void apply_initial_cond(std::vector<double>& u_solutions, double dx, double xo);
-//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-//    void pos_func(double pos, double& value);
-//
-//protected:
-//
-//
-//private:
-//    //virtual ~StepWave(){};
-//};
-//
-//class Curvilinear : public MutliDimInitCond{
-//public:
-//    void apply_initial_cond(std::vector<std::vector<double>>& uSol, RuntimeParamMultiDim& runtime);
-//    void convert_idx_to_position(int idx, double dx, double xo, double& pos);
-//    void pos_func(double x, double y, double& u);
-//protected:
-//private:
-//};
+    // Additional initial conditions from 2D
+    double ho_;
+    unsigned int nh_;
+    double dy_;
+    double hf_;
+
+private:
+};
+
+// 2D stepwave at 0, but applied for u and v
+class ExtendedCurvilinear : InitCond{
+public:
+    ExtendedCurvilinear(std::vector<double>& args);
+    void apply_initial_cond();
+    void enforce_boundary();
+    void pos_func(double x, double y, double& u);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+protected:
+    // Additional initial conditions from 2D
+    double ho_;
+    unsigned int nh_;
+    double dy_;
+    double hf_;
+private:
+
+};
+
 #endif //CFD_HW_INTCOND_H
