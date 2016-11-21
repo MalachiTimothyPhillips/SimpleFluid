@@ -288,3 +288,23 @@ void LaplacianBoundary::convert_idx_to_pos_y(unsigned int idx, double& pos){
 }
 
 
+DoNothing::DoNothing(std::vector<double>& args) : InitCond(args){
+    ho_ = args[DOF_IDS::ho];
+    nh_ = (unsigned int)args[DOF_IDS::nh];
+    hf_ = args[DOF_IDS::hf];
+    dy_ = (hf_ - ho_)/(double)nh_;
+}
+
+void DoNothing::apply_initial_cond(){
+    // Do nothing
+}
+
+void DoNothing::enforce_boundary(){
+    // Do nothing
+}
+
+void DoNothing::convert_idx_to_pos_y(unsigned int idx, double& pos){
+   // Do nothing
+}
+
+

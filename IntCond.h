@@ -116,7 +116,23 @@ protected:
     double dy_;
     double hf_;
 private:
+};
 
+// Do absolutely nothing
+class DoNothing : public InitCond{
+public:
+    DoNothing(std::vector<double>& args);
+    void apply_initial_cond();
+    void enforce_boundary();
+    //void pos_func(double x, double y, double& u);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+protected:
+    // Additional initial conditions from 2D
+    double ho_;
+    unsigned int nh_;
+    double dy_;
+    double hf_;
+private:
 };
 
 #endif //CFD_HW_INTCOND_H
