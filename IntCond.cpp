@@ -20,8 +20,16 @@ InitCond* InitCond::make_initial_condition(std::string& init_cond, std::vector<d
         return new SinWave(args);
     }
 
-    if(init_cond =="Curvilinear"){
+    if(init_cond == "Curvilinear"){
         return new Curvilinear(args);
+    }
+
+    if(init_cond == "ExtendedCurvilinear"){
+        return new ExtendedCurvilinear(args);
+    }
+
+    if(init_cond == "LaplacianBoundary"){
+        return new LaplacianBoundary(args);
     }
 
 }
@@ -226,7 +234,57 @@ void ExtendedCurvilinear::apply_initial_cond(){
             double waveVal;
             pos_func(x_curr, y_curr, waveVal);
             fluidEquation_->uSolutionsMatrix_[i][j] = waveVal;
+            fluidEquation_->vSolutionsMatrix_[i][j] = waveVal;
         }
     }
 }
+
+LaplacianBoundary::LaplacianBoundary(std::vector<double>& args) : InitCond(args){
+    ho_ = args[DOF_IDS::ho];
+    nh_ = (unsigned int)args[DOF_IDS::nh];
+    hf_ = args[DOF_IDS::hf];
+    dy_ = (hf_ - ho_)/(double)nh_;
+}
+
+void LaplacianBoundary::apply_initial_cond(){
+    // initial condition is just zeros
+    unsigned int XSIZE = nl_;
+    unsigned int YSIZE = nh_;
+    for (unsigned int i = 0 ; i < XSIZE; ++i){
+        for (unsigned int j = 0 ; j < YSIZE; ++j){
+            fluidEquation_->uSolutionsMatrix_[i][j] = 0.0;
+        }
+    }
+}
+
+void LaplacianBoundary::enforce_boundary(){
+    unsigned int XSIZE = nl_;
+    unsigned int YSIZE = nh_;
+
+    // fixed, x = 0
+    for (unsigned int j = 0 ; j < YSIZE; ++j){
+        fluidEquation_->uSolutionsMatrix_[0][j] = 10.;
+    }
+
+    // fixed, x = L
+    for (unsigned int j = 0 ; j < YSIZE; ++j){
+        fluidEquation_->uSolutionsMatrix_[nl_-1][j] = 5.0;
+    }
+
+    // fixed, y = 0
+    for (unsigned int i = 0 ; i < XSIZE; ++i){
+        fluidEquation_->uSolutionsMatrix_[i][0] = 4.0;
+    }
+
+    // fixed, y = H
+    for (unsigned int i = 0 ; i < XSIZE; ++i){
+        fluidEquation_->uSolutionsMatrix_[i][nh_-1] = 2.0;
+    }
+
+}
+
+void LaplacianBoundary::convert_idx_to_pos_y(unsigned int idx, double& pos){
+    pos = (double)idx * dy_ + ho_;
+}
+
 

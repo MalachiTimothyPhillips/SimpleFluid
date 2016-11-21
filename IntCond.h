@@ -84,12 +84,30 @@ private:
 };
 
 // 2D stepwave at 0, but applied for u and v
-class ExtendedCurvilinear : InitCond{
+class ExtendedCurvilinear : public InitCond{
 public:
     ExtendedCurvilinear(std::vector<double>& args);
     void apply_initial_cond();
     void enforce_boundary();
     void pos_func(double x, double y, double& u);
+    void convert_idx_to_pos_y(unsigned int idx, double& pos);
+protected:
+    // Additional initial conditions from 2D
+    double ho_;
+    unsigned int nh_;
+    double dy_;
+    double hf_;
+private:
+
+};
+
+// 2D stepwave at 0, but applied for u and v
+class LaplacianBoundary : public InitCond{
+public:
+    LaplacianBoundary(std::vector<double>& args);
+    void apply_initial_cond();
+    void enforce_boundary();
+    //void pos_func(double x, double y, double& u);
     void convert_idx_to_pos_y(unsigned int idx, double& pos);
 protected:
     // Additional initial conditions from 2D

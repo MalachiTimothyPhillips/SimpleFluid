@@ -72,6 +72,16 @@ public:
     std::vector<double> uSolutions_; // For 1D case
     matrix uSolutionsMatrix_; // For 2D case
     matrix vSolutionsMatrix_; // For 2D paired case
+
+
+    /*
+     * Matrix solutions for lid-driven cavity problem
+     */
+    matrix phi_; // streams
+    matrix omega_; // vorticity
+    matrix p_; // pressure
+    matrix w_;
+
 protected:
     // Base class does not include solutions (difference between 1D and 2D equations)
 
@@ -281,7 +291,64 @@ protected:
     double nu_; // for diffusive portion
 
 private:
+};
 
+//============================================================================================================
+/*
+ * 2D Laplacian Solver
+ */
+//============================================================================================================
+class Laplacian : public TwoDimFluidEquation{
+public:
+    // constructor
+    Laplacian(std::vector<double>& args);
+    void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+    // Data needed for linear wave equation
+    double eps_;
+    double beta_;
+
+    bool isConverged_ = false;
+private:
+
+};
+
+//============================================================================================================
+/*
+ * 2D Lid Driven Cavity
+ */
+//============================================================================================================
+class LidDriven : public TwoDimFluidEquation{
+public:
+    // constructor
+    LidDriven(std::vector<double>& args);
+    void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+    void apply_stream_func();
+    void apply_vorticity_boundary();
+    void apply_rhs();
+    void update_vorticity();
+    void update_velocity();
+    void update_pressure();
+
+    matrix pTemp_; //temporary p matrix
+
+protected:
+    // Data needed for linear wave equation
+    double eps_;
+    double beta_;
+
+    double Re_; // Use the time specification for the reynolds number
+
+    // For now, force sub iterations for stream function solution to be the same as overall
+    // Force user to pick delta X, delta Y to be the same
+    // Force numerical epsilon to be the same for the stream function solution and others
+
+    bool isConverged_ = false;
+private:
 
 };
 #endif //CFD_HW_FLUIDEQUATION_H
