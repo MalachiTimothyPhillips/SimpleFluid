@@ -982,7 +982,10 @@ void SodShockRoe::apply_step(){
     enth.assign(nl_,0.0);
     for (unsigned int i = 0 ; i < nl_; ++i){
         // Compute vector of enthalpies
-        enth[i] = (E_[i]+pressure_[i])/(rho_[i]);
+        enth[i] = E_[i] + pressure_[i]/rho_[i];
+
+        // Change E to rho E
+        E_[i] *= rho_[i];
     }
 
     // Calculate fluxes due to Roe's method
@@ -999,46 +1002,58 @@ void SodShockRoe::apply_step(){
         double ur = uSolutions_[i+1];
         double ul = uSolutions_[i];
 
-        // Needed:: RHS/LHS junctions difference
-        double u1 = rho_r-rho_l;
-        double u2 = rhou_r - rhou_l;
-        double u3 = Hr - Hl;
-
         // Calculate flux-averaged quanitites
         double u_av = (sqrt(rho_r)*ur+sqrt(rho_l)*ul)/(sqrt(rho_r)+sqrt(rho_l));
         double H_av = (sqrt(rho_r)*Hr+sqrt(rho_l)*Hl)/(sqrt(rho_r)+sqrt(rho_l));
-        double c_av = sqrt((gamma_-1)*(H_av-0.5*u_av*u_av));
+        double c_av = sqrt((gamma_-1.)*(H_av-0.5*u_av*u_av));
 
         // Calculate eigenvalues
-        double lambda1 = u_av-c_av;
-        double lambda2 = u_av;
-        double lambda3 = u_av+c_av;
+        double lambda1 = fabs(u_av-c_av);
+        double lambda2 = fabs(u_av);
+        double lambda3 = fabs(u_av+c_av);
+
+        // Difference variables
+        double d_rho = rho_[i+1]-rho_[i];
+        double d_rhou = rho_u_[i+1]-rho_u_[i];
+        double d_rhoE = E_[i+1] - E_[i];
+
+        // Values from Roe Matrix
+        double r11 = 0.25*u_av/c_av*(2.+(gamma_-1.)*u_av/c_av);
+        double r12 = -0.5/c_av*(1.+(gamma_-1.)*u_av/c_av);
+        double r13 = 0.5*(gamma_-1)/c_av/c_av;
+        double r21 = 1.-0.5*(gamma_-1)*u_av*u_av/c_av/c_av;
+        double r22 = (gamma_-1.)*u_av/c_av/c_av;
+        double r23 = -r22;
+        double r31 = -0.25*u_av/c_av*(2.-(gamma_-1.)*u_av/c_av);
+        double r32 = 0.5/c_av*(1.-(gamma_-1.)*u_av/c_av);
+        double r33 = 0.5*(gamma_-1.)/c_av/c_av;
 
         // Calculate alpha values
-        double alpha2 = (gamma_-1)/(c_av*c_av)*(u1*(H_av-u_av*u_av)+u_av*u2-u3);
-        double alpha1 = 1./(2.*c_av)*(u1*(u_av+c_av)-u2-c_av*alpha2);
-        double alpha3 = u1 - (alpha1+alpha2);
+        double alpha1 = r11*d_rho + r12*d_rhou + r13*d_rhoE;
+        double alpha2 = r21*d_rho + r22*d_rhou + r23*d_rhoE;
+        double alpha3 = r31*d_rho + r32*d_rhou + r33*d_rhoE;
+
 
         // Calculate K-Values to find individual fluxes
         //k = alpha1 * lambda1 * k1,1 + ...
-        double k1 = alpha1 * fabs(lambda1) * 1 + // Recall: k1,1 = 1
-                    alpha2 * fabs(lambda2) * 1 +
-                    alpha3 * fabs(lambda3) * 1;
+        double k1 = alpha1 * fabs(lambda1) * 1. + // Recall: k1,1 = 1
+                    alpha2 * fabs(lambda2) * 1. +
+                    alpha3 * fabs(lambda3) * 1.;
         double k2 = alpha1 * fabs(lambda1) * (u_av-c_av) + // Recall: k2,1 = u-a
                     alpha2 * fabs(lambda2) * (u_av) +      // k2,2 = u
                     alpha3 * fabs(lambda3) * (u_av+c_av);  // k3,3 = u+a
         double k3 = alpha1 * fabs(lambda1) * (H_av-u_av*c_av) + // Recall: k3,1 = H-ua
-                    alpha2 * fabs(lambda2) * (0.5*u_av*u_av) +  // k2,2 = 1/2u^2
+                    alpha2 * fabs(lambda2) * (u_av*u_av) +  // k2,2 = u^2
                     alpha3 * fabs(lambda3) * (H_av+u_av*c_av);  // k3,3 = H+ua
 
         // Find LHS Flux, or flux at i
-        double rho_flux = rho_l;
-        double mom_flux = rhou_l*ul + Pl;
-        double E_flux = ul*(E_[i] + Pl);
+        double rho_flux = rhou_l;
+        double mom_flux = (gamma_-1.)*E_[i]-0.5*(gamma_-3.)*rhou_l*rhou_l/rho_l;
+        double E_flux = rhou_l*Hl;
         // Find RHS Flux, or flux at i+1
-        double rho_flux_r = rho_r;
-        double mom_flux_r = rhou_r*ur + Pr;
-        double E_flux_r = ur*(E_[i+1] + Pr);
+        double rho_flux_r = rhou_r;
+        double mom_flux_r = (gamma_-1.)*E_[i+1]-0.5*(gamma_-3.)*rhou_r*rhou_r/rho_r;
+        double E_flux_r = rhou_r*Hr;
         // Average Flux F_(i+1/2) is calculated as 1/2(FL+FR) - 1/2(k)
 
         rho_f[i] = 0.5*(rho_flux+rho_flux_r) - 0.5*(k1);
@@ -1059,20 +1074,25 @@ void SodShockRoe::apply_step(){
     for (unsigned int i = 1; i < nl_-1; ++i){
         rho_sol_corr[i] = rho_[i] + t_const*(rho_f[i-1]-rho_f[i]);
         rhou_sol_corr[i] = rho_u_[i] + t_const*(rhou_f[i-1] - rhou_f[i]);
-        E_sol_corr[i] = enth[i] + t_const*(E_f[i-1]-E_f[i]);
+        E_sol_corr[i] = E_[i] + t_const*(E_f[i-1]-E_f[i]);
     }
 
 
     // Write solutions
     for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
-        // New pressure is calculated using an adiabatic gas law using the previous pressure
-        pressure_[i] = fabs(pressure_[i] * std::pow(rho_sol_corr[i]/rho_[i], gamma_));
         rho_[i] = fabs(rho_sol_corr[i]);
         rho_u_[i] = fabs(rhou_sol_corr[i]);
         uSolutions_[i] = fabs(rho_u_[i]/rho_[i]);
 
-        // Update from enthalpy the energy
-        E_[i] = fabs(E_sol_corr[i]*rho_[i]-pressure_[i]);
+        // Update Rho_E
+        E_[i] = fabs(E_sol_corr[i]);
+
+        // Finally, convert to E by dividing by rho
+        E_[i] = E_[i]/rho_[i];
+
+        // Calculate new pressure
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+
     }
     // Add to time
     T_ += dt_;
