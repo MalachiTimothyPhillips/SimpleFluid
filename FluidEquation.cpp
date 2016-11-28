@@ -10,6 +10,10 @@
 #include <iostream>
 #include <iomanip>
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+} // sgn function
+
 //-----------------------------------------------------------------------------------------------------------
 FluidEquation *FluidEquation::make_fluid_equation(std::string &equationType, std::vector<double> &args) {
 
@@ -24,20 +28,40 @@ FluidEquation *FluidEquation::make_fluid_equation(std::string &equationType, std
     } // FTBS/FTFS first order time, space upwind/downwind shifter with adapative timestep
     if (equationType == "TwoDimLinAdvectionEquation") {
         return new TwoDimLinAdvectionEquation(args);
-    }
+    } // FTBS/FTFS first order time, space upwind/downwind shifter
     if (equationType == "MultiDimDiffusion") {
         return new MultiDimDiffusion(args);
-    }
+    } // FTCS first order time, second order space
     if (equationType == "MultiDimBurger") {
         return new MultiDimBurger(args);
-    }
+    } // FTBS/FTFS first order time, first order space upwind/downwind shifter with adaptive timestep
     if (equationType == "Laplacian") {
         return new Laplacian(args);
     }
     if (equationType == "LidDriven") {
         return new LidDriven(args);
     }
-
+    if (equationType == "SodShockUpwind") {
+        return new SodShockUpwind(args);
+    }
+    if (equationType == "SodShockMacCormack") {
+        return new SodShockMacCormack(args);
+    }
+    if (equationType == "SodShockLaxWendroff"){
+        return new SodShockLaxWendroff(args);
+    }
+    if (equationType == "SodShockLaxWendroffDissipation"){
+        return new SodShockLaxWendroffDissipation(args);
+    }
+    if (equationType == "SodShockRusanov"){
+        return new SodShockRusanov(args);
+    }
+    if (equationType == "SodShockGudonov"){
+        return new SodShockGudonov(args);
+    }
+    if (equationType == "SodShockRoe"){
+        return new SodShockRoe(args);
+    }
 }
 
 
@@ -262,6 +286,800 @@ void ViscousBurgerEquationFTCS::apply_step() {
     // Add dt_ to find current time
     T_ += dt_;
 }
+
+//============================================================================================================
+/*
+ * Base Class for Sod Shock Tube Problems
+ */
+//============================================================================================================
+SodShockBase::SodShockBase(std::vector<double> &args) : FluidEquation(args) {
+    uSolutions_.resize(nl_, 0.0);
+    rho_.resize(nl_, 0.0);
+    rho_u_.resize(nl_, 0.0);
+    E_.resize(nl_, 0.0);
+    pressure_.resize(nl_, 0.0);
+
+    eps_ = args[DOF_IDS::eps];
+    nu_ = args[DOF_IDS::c];
+} // constructor
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockBase::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    //Write current time step to the file
+    std::ofstream outFile(template_file_name + std::to_string(T_));
+    for (unsigned int i = 0; i < uSolutions_.size(); ++i) {
+        double pos;
+        convert_idx_to_pos(i, pos);
+        outFile << pos << "     ";
+        outFile << uSolutions_[i] << "     ";
+        // In addition, want E, rho, P
+        outFile << E_[i] << "     ";
+        outFile << rho_[i] << "     ";
+        outFile << pressure_[i] << std::endl;
+    } // writes file in two column format: x and u(x)
+    outFile.close();
+}
+
+
+//============================================================================================================
+/*
+ * Simple upwind scheme for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockUpwind::SodShockUpwind(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockUpwind::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockUpwind::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    std::vector<double> rho_sol;
+    rho_sol.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol;
+    rhou_sol.assign(nl_,0.0);
+
+    std::vector<double> E_sol;
+    E_sol.assign(nl_,0.0);
+
+    // Apply actual step
+    for (unsigned int i = 1 ; i < nl_-1; ++i){
+        // Solve the density portion
+        double u_curr = uSolutions_[i];
+        int idx = sgn(u_curr);
+        double d_idx = sgn(u_curr);
+        unsigned int prev = i-idx;
+        rho_sol[i] = rho_[i] - d_idx*t_const*(rho_u_[i] - rho_u_[prev]);
+        E_sol[i] = E_[i] - d_idx*t_const*(u_curr*(E_[i]+pressure_[i])-uSolutions_[prev]*
+                                                                              (E_[prev]+pressure_[prev]));
+        rhou_sol[i] = rho_u_[i] - d_idx*t_const*(rho_u_[i]*u_curr - rho_u_[prev]*uSolutions_[prev])
+                - 0.5*t_const*(pressure_[i+1]-pressure_[i]);
+    }
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = rho_sol[i];
+        E_[i] = E_sol[i];
+        rho_u_[i] = rhou_sol[i];
+        uSolutions_[i] = rho_u_[i]/rho_[i];
+        // Fill other important parameters
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+    }
+
+
+    // Add to time
+    T_ += dt_;
+}
+
+//============================================================================================================
+/*
+ * MacCormack scheme for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockMacCormack::SodShockMacCormack(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockMacCormack::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockMacCormack::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    std::vector<double> rho_sol;
+    rho_sol.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol;
+    rhou_sol.assign(nl_,0.0);
+
+    std::vector<double> E_sol;
+    E_sol.assign(nl_,0.0);
+
+    // Find predictor
+    for (unsigned int i = 1 ; i < nl_-1; ++i) {
+        // Calculate temporary vector solution
+        rho_sol[i] = rho_[i] -t_const*(rho_u_[i+1]-rho_u_[i]);
+        rhou_sol[i] = rho_u_[i] -t_const*(rho_u_[i+1]*uSolutions_[i+1]+pressure_[i+1]
+        - rho_u_[i]*uSolutions_[i] - pressure_[i]);
+        E_sol[i] = E_[i] -t_const*(uSolutions_[i+1]*(E_[i+1]+pressure_[i+1])-uSolutions_[i]*(E_[i]+pressure_[i]));
+    }
+
+    // Assign boundaries
+    rho_sol[0] = rho_[0];
+    rho_sol[nl_-1] = rho_[nl_-1];
+    rhou_sol[0] = rho_u_[0];
+    rhou_sol[nl_-1] = rho_u_[nl_-1];
+    E_sol[0] = E_[0];
+    E_sol[nl_-1] = E_[nl_-1];
+
+    // Update pressure before corrector step
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // Need to change this to step
+        pressure_[i] = (E_sol[i] - 0.5*rhou_sol[i] * rhou_sol[i]/rho_sol[i])*(gamma_-1);
+    }
+
+    std::vector<double> rho_sol_corr;
+    rho_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol_corr;
+    rhou_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> E_sol_corr;
+    E_sol_corr.assign(nl_,0.0);
+
+    // Apply corrector step
+    for (unsigned int i = 1; i < nl_-1; ++i){
+        rho_sol_corr[i] = 0.5*(rho_[i]+rho_sol[i])-0.5*t_const*(rhou_sol[i]-rhou_sol[i-1]);
+        rhou_sol_corr[i] = 0.5*(rho_u_[i]+rhou_sol[i])-0.5*t_const*(rhou_sol[i]*rhou_sol[i]/rho_sol[i]+pressure_[i]
+        - rhou_sol[i-1]*rhou_sol[i-1]/rho_sol[i-1]-pressure_[i-1]);
+        E_sol_corr[i] = 0.5*(E_[i]+E_sol[i])-0.5*t_const*(rhou_sol[i]/rho_sol[i]*(E_sol[i]+pressure_[i])-
+        rhou_sol[i-1]/rho_sol[i-1]*(E_sol[i-1]+pressure_[i-1]));
+    } // Corrector step applied
+
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = rho_sol_corr[i];
+        E_[i] = E_sol_corr[i];
+        rho_u_[i] = rhou_sol_corr[i];
+        uSolutions_[i] = rho_u_[i]/rho_[i];
+        // Fill other important parameters
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+    }
+
+    // Add to time
+    T_ += dt_;
+}
+
+//============================================================================================================
+/*
+ * LaxWendroff scheme for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockLaxWendroff::SodShockLaxWendroff(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockLaxWendroff::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockLaxWendroff::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    std::vector<double> rho_sol;
+    rho_sol.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol;
+    rhou_sol.assign(nl_,0.0);
+
+    std::vector<double> E_sol;
+    E_sol.assign(nl_,0.0);
+
+    // Find predictor for Lax Wendroff
+    for (unsigned int i = 1 ; i < nl_-1; ++i) {
+        // Calculate temporary vector solution
+        rho_sol[i] = 0.5*(rho_[i]+rho_[i+1]) -0.5*t_const*(rho_u_[i+1]-rho_u_[i]);
+        rhou_sol[i] = 0.5*(rho_u_[i]+rho_u_[i+1]) -0.5*t_const*(rho_u_[i+1]*uSolutions_[i+1]+pressure_[i+1]
+                                          - rho_u_[i]*uSolutions_[i] - pressure_[i]);
+        E_sol[i] = 0.5*(E_[i]+E_[i+1]) -0.5*t_const*(uSolutions_[i+1]*(E_[i+1]+pressure_[i+1])-uSolutions_[i]*(E_[i]+pressure_[i]));
+    }
+
+    // Assign boundaries
+    rho_sol[0] = rho_[0];
+    rho_sol[nl_-1] = rho_[nl_-1];
+    rhou_sol[0] = rho_u_[0];
+    rhou_sol[nl_-1] = rho_u_[nl_-1];
+    E_sol[0] = E_[0];
+    E_sol[nl_-1] = E_[nl_-1];
+
+    // Update pressure before corrector step
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // Need to change this to step
+        pressure_[i] = (E_sol[i] - 0.5*rhou_sol[i] * rhou_sol[i]/rho_sol[i])*(gamma_-1);
+    }
+
+    std::vector<double> rho_sol_corr;
+    rho_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol_corr;
+    rhou_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> E_sol_corr;
+    E_sol_corr.assign(nl_,0.0);
+
+    // Apply corrector step
+    for (unsigned int i = 1; i < nl_-1; ++i){
+        rho_sol_corr[i] = rho_[i]-t_const*(rhou_sol[i]-rhou_sol[i-1]);
+        rhou_sol_corr[i] =rho_u_[i]-t_const*(rhou_sol[i]*rhou_sol[i]/rho_sol[i]+pressure_[i]
+                                                                    - rhou_sol[i-1]*rhou_sol[i-1]/rho_sol[i-1]-pressure_[i-1]);
+        E_sol_corr[i] = E_[i]-t_const*(rhou_sol[i]/rho_sol[i]*(E_sol[i]+pressure_[i])-
+                                                          rhou_sol[i-1]/rho_sol[i-1]*(E_sol[i-1]+pressure_[i-1]));
+    } // Corrector step applied
+
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = rho_sol_corr[i];
+        E_[i] = E_sol_corr[i];
+        rho_u_[i] = rhou_sol_corr[i];
+        uSolutions_[i] = rho_u_[i]/rho_[i];
+        // Fill other important parameters
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+    }
+
+    // Add to time
+    T_ += dt_;
+}
+
+//============================================================================================================
+/*
+ * LaxWendroff scheme with dissipative adjustment for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockLaxWendroffDissipation::SodShockLaxWendroffDissipation(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockLaxWendroffDissipation::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockLaxWendroffDissipation::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    std::vector<double> rho_sol;
+    rho_sol.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol;
+    rhou_sol.assign(nl_,0.0);
+
+    std::vector<double> E_sol;
+    E_sol.assign(nl_,0.0);
+
+    // Find predictor for Lax Wendroff
+    for (unsigned int i = 1 ; i < nl_-1; ++i) {
+        // Calculate temporary vector solution
+        rho_sol[i] = 0.5*(rho_[i]+rho_[i+1]) -0.5*t_const*(rho_u_[i+1]-rho_u_[i]);
+        rhou_sol[i] = 0.5*(rho_u_[i]+rho_u_[i+1]) -0.5*t_const*(rho_u_[i+1]*uSolutions_[i+1]+pressure_[i+1]
+                                                                - rho_u_[i]*uSolutions_[i] - pressure_[i]);
+        E_sol[i] = 0.5*(E_[i]+E_[i+1]) -0.5*t_const*(uSolutions_[i+1]*(E_[i+1]+pressure_[i+1])-uSolutions_[i]*(E_[i]+pressure_[i]));
+    }
+
+    // Assign boundaries
+    rho_sol[0] = rho_[0];
+    rho_sol[nl_-1] = rho_[nl_-1];
+    rhou_sol[0] = rho_u_[0];
+    rhou_sol[nl_-1] = rho_u_[nl_-1];
+    E_sol[0] = E_[0];
+    E_sol[nl_-1] = E_[nl_-1];
+
+    // Update pressure before corrector step
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // Need to change this to step
+        pressure_[i] = (E_sol[i] - 0.5*rhou_sol[i] * rhou_sol[i]/rho_sol[i])*(gamma_-1);
+    }
+
+    std::vector<double> rho_sol_corr;
+    rho_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol_corr;
+    rhou_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> E_sol_corr;
+    E_sol_corr.assign(nl_,0.0);
+
+    // Apply corrector step
+    for (unsigned int i = 1; i < nl_-1; ++i){
+        rho_sol_corr[i] = rho_[i]-t_const*(rhou_sol[i]-rhou_sol[i-1]);
+        rhou_sol_corr[i] =rho_u_[i]-t_const*(rhou_sol[i]*rhou_sol[i]/rho_sol[i]+pressure_[i]
+                                             - rhou_sol[i-1]*rhou_sol[i-1]/rho_sol[i-1]-pressure_[i-1]);
+        E_sol_corr[i] = E_[i]-t_const*(rhou_sol[i]/rho_sol[i]*(E_sol[i]+pressure_[i])-
+                                       rhou_sol[i-1]/rho_sol[i-1]*(E_sol[i-1]+pressure_[i-1]));
+    } // Corrector step applied
+
+    // Now apply the dissipative portion correction to the solution
+
+    /*
+     * Notice there will be no dissipation in the mass equation
+     */
+
+    // First, need new solution vectors
+
+    std::vector<double> rhou_sol_f;
+    rhou_sol_f.assign(nl_,0.0);
+
+    std::vector<double> E_sol_f;
+    E_sol_f.assign(nl_,0.0);
+
+    double nu = 0.01; // Try this as a starting point
+
+    for (unsigned int i = 1; i < nl_-1;++i){
+        rhou_sol_f[i] = rhou_sol_corr[i] + nu*t_const*(rhou_sol_corr[i+1]*rhou_sol_corr[i+1]-2.*(rhou_sol_corr[i+1]-rhou_sol_corr[i])*(rhou_sol_corr[i]-rhou_sol_corr[i-1])
+        -rhou_sol_corr[i-1]*rhou_sol_corr[i-1])*sgn(rhou_sol_corr[i+1]-rhou_sol_corr[i]);
+        E_sol_f[i] = E_sol_corr[i] + nu*t_const*
+         (E_sol_corr[i+1]*E_sol_corr[i+1]-2.*(E_sol_corr[i+1]*E_sol_corr[i])*(E_sol_corr[i]-E_sol_corr[i-1])-E_sol_corr[i-1]*E_sol_corr[i-1])
+                *sgn(E_sol_corr[i+1]-E_sol_corr[i]);
+    }
+
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = rho_sol_corr[i];
+        E_[i] = E_sol_f[i];
+        rho_u_[i] = rhou_sol_f[i];
+        uSolutions_[i] = rho_u_[i]/rho_[i];
+        // Fill other important parameters
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+    }
+
+    // Add to time
+    T_ += dt_;
+}
+
+//============================================================================================================
+/*
+ * Simple upwind scheme for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockRusanov::SodShockRusanov(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockRusanov::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockRusanov::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    std::vector<double> rho_sol;
+    rho_sol.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol;
+    rhou_sol.assign(nl_,0.0);
+
+    std::vector<double> E_sol;
+    E_sol.assign(nl_,0.0);
+
+    double w = 1.05;//0.5*(eps_ + 1/eps_); // Use average of CFL+1/CFL
+
+    // Dimension alpha vector
+    std::vector<double> alpha;
+    alpha.resize(nl_,0.0);
+
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // compute current speed of sound in medium
+        double c = sqrt(gamma_*pressure_[i]/rho_[i]);
+        double u = uSolutions_[i];
+        alpha[i] = w*t_const*(u+c);
+    }
+
+    // Apply actual step
+    for (unsigned int i = 1 ; i < nl_-1; ++i){
+        rho_sol[i] = rho_[i]-0.5*t_const*(rho_u_[i+1]-rho_u_[i-1])
+                +0.25*((alpha[i+1]+alpha[i])*(rho_[i+1]-rho_[i])
+                -(alpha[i]-alpha[i-1])*(rho_[i]-rho_[i-1]));
+
+        E_sol[i] = E_[i]-0.5*t_const*((uSolutions_[i+1]*(E_[i+1]+pressure_[i+1]))-(uSolutions_[i-1]*(E_[i-1]+pressure_[i-1])))
+                +0.25*((alpha[i+1]+alpha[i])*(E_[i+1]-E_[i])
+                       -(alpha[i]-alpha[i-1])*(E_[i]-E_[i-1]));
+
+        rhou_sol[i] = rho_u_[i]-0.5*t_const*((rho_u_[i+1]*uSolutions_[i+1]+pressure_[i+1])-(rho_u_[i-1]*uSolutions_[i-1]+pressure_[i-1]))
+                                +0.25*((alpha[i+1]+alpha[i])*(rho_u_[i+1]-rho_u_[i])
+                                       -(alpha[i]-alpha[i-1])*(rho_u_[i]-rho_u_[i-1]));
+    }
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = rho_sol[i];
+        E_[i] = E_sol[i];
+        rho_u_[i] = rhou_sol[i];
+        uSolutions_[i] = rho_u_[i]/rho_[i];
+
+        // Fill other important parameters
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+    }
+
+    // Add to time
+    T_ += dt_;
+}
+
+//============================================================================================================
+/*
+ * Gudonov scheme for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockGudonov::SodShockGudonov(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockGudonov::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockGudonov::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    std::vector<double> rho_sol;
+    rho_sol.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol;
+    rhou_sol.assign(nl_,0.0);
+
+    std::vector<double> E_sol;
+    E_sol.assign(nl_,0.0);
+
+    // Find predictor for Gudonov
+    for (unsigned int i = 1 ; i < nl_-1; ++i) {
+        // Calculate temporary vector solution
+        rho_sol[i] = 0.5*(rho_[i]+rho_[i+1]) -t_const*(rho_u_[i+1]-rho_u_[i]);
+        rhou_sol[i] = 0.5*(rho_u_[i]+rho_u_[i+1]) -t_const*(rho_u_[i+1]*uSolutions_[i+1]+pressure_[i+1]
+                                                                - rho_u_[i]*uSolutions_[i] - pressure_[i]);
+        E_sol[i] = 0.5*(E_[i]+E_[i+1]) -t_const*(uSolutions_[i+1]*(E_[i+1]+pressure_[i+1])-uSolutions_[i]*(E_[i]+pressure_[i]));
+    }
+
+    // Assign boundaries
+    rho_sol[0] = rho_[0];
+    rho_sol[nl_-1] = rho_[nl_-1];
+    rhou_sol[0] = rho_u_[0];
+    rhou_sol[nl_-1] = rho_u_[nl_-1];
+    E_sol[0] = E_[0];
+    E_sol[nl_-1] = E_[nl_-1];
+
+    // Update pressure before corrector step
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // Need to change this to step
+        pressure_[i] = (E_sol[i] - 0.5*rhou_sol[i] * rhou_sol[i]/rho_sol[i])*(gamma_-1);
+    }
+
+    std::vector<double> rho_sol_corr;
+    rho_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol_corr;
+    rhou_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> E_sol_corr;
+    E_sol_corr.assign(nl_,0.0);
+
+    // Apply corrector step
+    for (unsigned int i = 1; i < nl_-1; ++i){
+        rho_sol_corr[i] = rho_[i]-t_const*(rhou_sol[i]-rhou_sol[i-1]);
+        rhou_sol_corr[i] =rho_u_[i]-t_const*(rhou_sol[i]*rhou_sol[i]/rho_sol[i]+pressure_[i]
+                                             - rhou_sol[i-1]*rhou_sol[i-1]/rho_sol[i-1]-pressure_[i-1]);
+        E_sol_corr[i] = E_[i]-t_const*(rhou_sol[i]/rho_sol[i]*(E_sol[i]+pressure_[i])-
+                                       rhou_sol[i-1]/rho_sol[i-1]*(E_sol[i-1]+pressure_[i-1]));
+    } // Corrector step applied
+
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = rho_sol_corr[i];
+        E_[i] = E_sol_corr[i];
+        rho_u_[i] = rhou_sol_corr[i];
+        uSolutions_[i] = rho_u_[i]/rho_[i];
+        // Fill other important parameters
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+    }
+
+    // Add to time
+    T_ += dt_;
+}
+
+//============================================================================================================
+/*
+ * Classic (original) Roe scheme for Sod Shock Tube Problem
+ */
+//============================================================================================================
+SodShockRoe::SodShockRoe(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockRoe::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockRoe::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+
+    // These are flux vectors
+    std::vector<double> rho_f;
+    rho_f.assign(nl_,0.0);
+
+    std::vector<double> rhou_f;
+    rhou_f.assign(nl_,0.0);
+
+    std::vector<double> E_f;
+    E_f.assign(nl_,0.0);
+
+    std::vector<double> enth;
+    enth.assign(nl_,0.0);
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // Compute vector of enthalpies
+        enth[i] = (E_[i]+pressure_[i])/(rho_[i]);
+    }
+
+    // Calculate fluxes due to Roe's method
+    for (unsigned int i = 0 ; i < nl_-1; ++i) {
+        // Values associated with RHS
+        double Pr = pressure_[i+1];
+        double Pl = pressure_[i];
+        double rho_r = rho_[i+1];
+        double rho_l = rho_[i];
+        double Hr = enth[i+1];
+        double Hl = enth[i];
+        double rhou_r = rho_u_[i+1];
+        double rhou_l = rho_u_[i];
+        double ur = uSolutions_[i+1];
+        double ul = uSolutions_[i];
+
+        // Needed:: RHS/LHS junctions difference
+        double u1 = rho_r-rho_l;
+        double u2 = rhou_r - rhou_l;
+        double u3 = Hr - Hl;
+
+        // Calculate flux-averaged quanitites
+        double u_av = (sqrt(rho_r)*ur+sqrt(rho_l)*ul)/(sqrt(rho_r)+sqrt(rho_l));
+        double H_av = (sqrt(rho_r)*Hr+sqrt(rho_l)*Hl)/(sqrt(rho_r)+sqrt(rho_l));
+        double c_av = sqrt((gamma_-1)*(H_av-u_av*u_av));
+
+        // Calculate eigenvalues
+        double lambda1 = u_av-c_av;
+        double lambda2 = u_av;
+        double lambda3 = u_av+c_av;
+
+        // Calculate alpha values
+        double alpha2 = (gamma_-1)/(c_av*c_av)*(u1*(H_av-u_av*u_av)+u_av*u2-u3);
+        double alpha1 = 1./(2.*c_av)*(u1*(u_av+c_av)-u2-c_av*alpha2);
+        double alpha3 = u1 - (alpha1+alpha2);
+
+        // Calculate K-Values to find individual fluxes
+        //k = alpha1 * lambda1 * k1,1 + ...
+        double k1 = alpha1 * fabs(lambda1) * 1 + // Recall: k1,1 = 1
+                    alpha2 * fabs(lambda2) * 1 +
+                    alpha3 * fabs(lambda3) * 1;
+        double k2 = alpha1 * fabs(lambda1) * (u_av-c_av) + // Recall: k2,1 = u-a
+                    alpha2 * fabs(lambda2) * (u_av) +      // k2,2 = u
+                    alpha3 * fabs(lambda3) * (u_av+c_av);  // k3,3 = u+a
+        double k3 = alpha1 * fabs(lambda1) * (H_av-u_av*c_av) + // Recall: k3,1 = H-ua
+                    alpha2 * fabs(lambda2) * (0.5*u_av*u_av) +  // k2,2 = 1/2u^2
+                    alpha3 * fabs(lambda3) * (H_av+u_av*c_av);  // k3,3 = H+ua
+
+        // Find LHS Flux, or flux at i
+        double rho_flux = rho_u_[i];
+        double mom_flux = rho_u_[i]*uSolutions_[i] + pressure_[i];
+        double E_flux = uSolutions_[i]*(E_[i] + pressure_[i]);
+        // Find RHS Flux, or flux at i+1
+        double rho_flux_r = rho_u_[i+1];
+        double mom_flux_r = rho_u_[i+1]*uSolutions_[i+1] + pressure_[i+1];
+        double E_flux_r = uSolutions_[i+1]*(E_[i+1] + pressure_[i+1]);
+        // Average Flux F_(i+1/2) is calculated as 1/2(FL+FR) - 1/2(k)
+
+        rho_f[i] = 0.5*(rho_flux+rho_flux_r) - 0.5*(k1);
+        rhou_f[i] = 0.5*(mom_flux+mom_flux_r) - 0.5*(k2);
+        E_f[i] = 0.5*(E_flux+E_flux_r) - 0.5*(k3);
+    }
+
+    // Once fluxes are calculated, can now calculate values
+    std::vector<double> rho_sol_corr;
+    rho_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol_corr;
+    rhou_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> E_sol_corr;
+    E_sol_corr.assign(nl_,0.0);
+
+    for (unsigned int i = 1; i < nl_-1; ++i){
+        rho_sol_corr[i] = rho_[i] + t_const*(rho_f[i-1]-rho_f[i]);
+        rhou_sol_corr[i] = rho_u_[i] + t_const*(rhou_f[i-1] - rhou_f[i]);
+        E_sol_corr[i] = enth[i] + t_const*(E_f[i-1]-E_f[i]);
+    }
+
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        // New pressure is calculated using an adiabatic gas law using the previous pressure
+        pressure_[i] = fabs(pressure_[i] * std::pow(rho_sol_corr[i]/rho_[i], gamma_));
+        rho_[i] = fabs(rho_sol_corr[i]);
+        rho_u_[i] = fabs(rhou_sol_corr[i]);
+        uSolutions_[i] = fabs(rho_u_[i]/rho_[i]);
+
+        // Update from enthalpy the energy
+        E_[i] = E_sol_corr[i]*rho_[i]-pressure_[i];
+
+    }
+
+    // Add to time
+    T_ += dt_;
+}
+
 
 //============================================================================================================
 /*
@@ -819,7 +1637,7 @@ void LidDriven::apply_stream_func() {
 
     // Loop over total iterations
     double err = 0.0;
-    for (unsigned int t = 0; t < nt_; ++t) {
+    for (unsigned int t = 0; t < 100; ++t) { // TEST:: hard code in 1000 steps
 
         for (unsigned int i = 1; i < nl_ - 1; ++i) {
             for (unsigned int j = 1; j < nh_ - 1; ++j) {
@@ -839,7 +1657,7 @@ void LidDriven::apply_stream_func() {
         // At end, find total errors
         for (unsigned int i = 0; i < nl_; ++i) {
             for (unsigned int j = 0; j < nh_; ++j) {
-                err += err + fabs(w_[i][j] - phi_[i][j]);
+                err += err + fabs(w_[i][j] - phi_[i][j]); // sum of errors -- larger than typical
             }
         }
         if (err < eps_) { // converged

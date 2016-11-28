@@ -31,6 +31,12 @@ InitCond* InitCond::make_initial_condition(std::string& init_cond, std::vector<d
     if(init_cond == "LaplacianBoundary"){
         return new LaplacianBoundary(args);
     }
+    if(init_cond == "DoNothing"){
+        return new DoNothing(args);
+    }
+    if(init_cond == "SodShockTube"){
+        return new SodShockTube(args);
+    }
 
 }
 
@@ -68,6 +74,62 @@ void SinWave::enforce_boundary() {
      */
     fluidEquation_->uSolutions_[0] = 10.0 * sin(0.1 * fluidEquation_->get_lo());
     fluidEquation_->uSolutions_[fluidEquation_->get_nl()] = 10.0 * sin(0.1 * fluidEquation_->get_lf());
+}
+
+// SodShockTube constructor
+SodShockTube::SodShockTube(std::vector<double>& args) : InitCond(args){
+    // Nothing to do here
+}
+
+void SodShockTube::apply_initial_cond() {
+
+    /*
+     * Apply initial conditions for Sod Shock Tube
+     *
+     * Pl = 1.0, rho_l = 1.0, u_l = 0.0
+     * Pr = 0.1, rho_r = 0.125, u_r = 0.0
+     */
+
+    // Apply condition on u
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        // Get current position
+        double pos;
+        convert_idx_to_pos(i,pos);
+        // LHS of partition is assigned LHS initial conditions
+        // Energy is computed as E = rho * e + 0.5 rho u^2
+        // e = P/(gamma-1) * rho
+        double e;
+        if (pos < 0.5 ){
+            fluidEquation_->uSolutions_[i] = u_l_;
+            fluidEquation_->rho_[i] = rho_l_;
+            fluidEquation_->E_[i] = P_l_/(gamma_-1) + 0.5*rho_l_*u_l_*u_l_;
+            fluidEquation_->rho_u_[i] = u_l_ * rho_l_;
+            fluidEquation_->pressure_[i] = P_l_;
+        }
+        if (pos >= 0.5){
+            fluidEquation_->uSolutions_[i] = u_r_;
+            fluidEquation_->rho_[i] = rho_r_;
+            fluidEquation_->E_[i] = P_r_/(gamma_-1) + 0.5*rho_r_*u_r_*u_r_;
+            fluidEquation_->rho_u_[i] = u_r_ * rho_r_;
+            fluidEquation_->pressure_[i] = P_r_;
+        }
+    }
+}
+
+void SodShockTube::enforce_boundary() {
+    /*
+     * End points are the same as left hand, right hand of barrier
+     */
+    fluidEquation_->uSolutions_[0] = u_l_;
+    fluidEquation_->uSolutions_[nl_-1] = u_r_;
+    fluidEquation_->rho_[0] = rho_l_;
+    fluidEquation_->rho_[nl_-1] = rho_r_;
+    fluidEquation_->rho_u_[0] = u_l_ * rho_l_;
+    fluidEquation_->rho_u_[nl_-1] = u_r_ * rho_r_;
+    fluidEquation_->E_[0] = P_l_/(gamma_-1) + 0.5*rho_l_*u_l_*u_l_;
+    fluidEquation_->E_[nl_-1] = P_r_/(gamma_-1) + 0.5*rho_r_*u_r_*u_r_;
+    fluidEquation_->pressure_[0] = P_l_;
+    fluidEquation_->pressure_[nl_-1] = P_r_;
 }
 
 Curvilinear::Curvilinear(std::vector<double>& args) : InitCond(args){

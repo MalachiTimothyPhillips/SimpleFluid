@@ -6,7 +6,6 @@
 #define CFD_HW_FLUIDEQUATION_H
 #include <vector>
 #include "RuntimeParameters.h"
-#include "BoundaryCond.h"
 #include "IntCond.h"
 #include <boost/multi_array.hpp>
 #include <cassert>
@@ -77,10 +76,21 @@ public:
     /*
      * Matrix solutions for lid-driven cavity problem
      */
+
     matrix phi_; // streams
     matrix omega_; // vorticity
     matrix p_; // pressure
     matrix w_;
+
+    /*
+     * std::vector<double>'s used to hold Sod Shock Solutions
+     */
+
+    std::vector<double> rho_;
+    std::vector<double> rho_u_;
+    std::vector<double> E_;
+    std::vector<double> pressure_;
+
 
 protected:
     // Base class does not include solutions (difference between 1D and 2D equations)
@@ -180,6 +190,140 @@ protected:
 private:
 };
 
+//============================================================================================================
+/*
+ * Base Class for Sod Shock Tube Problem
+ */
+//============================================================================================================
+class SodShockBase : public FluidEquation{
+public:
+    // constructor
+    SodShockBase(std::vector<double>&args);
+    virtual void apply_step() = 0;
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+    double nu_;
+    double dt_;
+    double eps_;
+    double T_ = 0;
+    double gamma_ = 1.4;
+private:
+};
+
+//============================================================================================================
+/*
+ * Simple Upwind Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockUpwind : public SodShockBase{
+public:
+    // constructor
+    SodShockUpwind(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
+//============================================================================================================
+/*
+ * MacCormack Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockMacCormack : public SodShockBase{
+public:
+    // constructor
+    SodShockMacCormack(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
+//============================================================================================================
+/*
+ * LaxWendroff Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockLaxWendroff : public SodShockBase{
+public:
+    // constructor
+    SodShockLaxWendroff(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
+//============================================================================================================
+/*
+ * LaxWendroff Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockLaxWendroffDissipation : public SodShockBase{
+public:
+    // constructor
+    SodShockLaxWendroffDissipation(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
+//============================================================================================================
+/*
+ * Rusanov Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockRusanov : public SodShockBase{
+public:
+    // constructor
+    SodShockRusanov(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
+//============================================================================================================
+/*
+ * Gudonov Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockGudonov : public SodShockBase{
+public:
+    // constructor
+    SodShockGudonov(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
+
+//============================================================================================================
+/*
+ * Classic (original) Roe Scheme for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockRoe : public SodShockBase{
+public:
+    // constructor
+    SodShockRoe(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+
+protected:
+private:
+};
+
 
 //============================================================================================================
 /*
@@ -276,7 +420,11 @@ private:
 
 };
 
-
+//============================================================================================================
+/*
+ *  2D Diffusion Equation
+ */
+//============================================================================================================
 class MultiDimBurger : public TwoDimFluidEquation{
 public:
     MultiDimBurger(std::vector<double>& args);

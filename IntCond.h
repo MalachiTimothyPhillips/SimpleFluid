@@ -64,6 +64,29 @@ private:
 
 };
 
+// Sod Shock Tube
+class SodShockTube : public InitCond{
+public:
+    SodShockTube(std::vector<double>& args);
+    void apply_initial_cond();
+    void enforce_boundary();
+protected:
+
+    double gamma_ = 1.4; // ideal gas
+
+    // Because magic numbers are bad
+    double P_l_ = 1.0;
+    double P_r_ = 0.1;
+
+    double rho_l_ = 1.0;
+    double rho_r_ = 0.125;
+
+    double u_l_ = 0.0;
+    double u_r_ = 0.0;
+
+private:
+};
+
 // 2D stepwave at 0
 class Curvilinear : public InitCond{
 public:

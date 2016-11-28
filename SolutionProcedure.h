@@ -7,7 +7,6 @@
 
 #include <vector>
 #include "RuntimeParameters.h"
-#include "BoundaryCond.h"
 #include "IntCond.h"
 #include <boost/multi_array.hpp>
 #include <cassert>
