@@ -1007,7 +1007,7 @@ void SodShockRoe::apply_step(){
         // Calculate flux-averaged quanitites
         double u_av = (sqrt(rho_r)*ur+sqrt(rho_l)*ul)/(sqrt(rho_r)+sqrt(rho_l));
         double H_av = (sqrt(rho_r)*Hr+sqrt(rho_l)*Hl)/(sqrt(rho_r)+sqrt(rho_l));
-        double c_av = sqrt((gamma_-1)*(H_av-u_av*u_av));
+        double c_av = sqrt((gamma_-1)*(H_av-0.5*u_av*u_av));
 
         // Calculate eigenvalues
         double lambda1 = u_av-c_av;
@@ -1032,18 +1032,18 @@ void SodShockRoe::apply_step(){
                     alpha3 * fabs(lambda3) * (H_av+u_av*c_av);  // k3,3 = H+ua
 
         // Find LHS Flux, or flux at i
-        double rho_flux = rho_u_[i];
-        double mom_flux = rho_u_[i]*uSolutions_[i] + pressure_[i];
-        double E_flux = uSolutions_[i]*(E_[i] + pressure_[i]);
+        double rho_flux = rho_l;
+        double mom_flux = rhou_l*ul + Pl;
+        double E_flux = ul*(E_[i] + Pl);
         // Find RHS Flux, or flux at i+1
-        double rho_flux_r = rho_u_[i+1];
-        double mom_flux_r = rho_u_[i+1]*uSolutions_[i+1] + pressure_[i+1];
-        double E_flux_r = uSolutions_[i+1]*(E_[i+1] + pressure_[i+1]);
+        double rho_flux_r = rho_r;
+        double mom_flux_r = rhou_r*ur + Pr;
+        double E_flux_r = ur*(E_[i+1] + Pr);
         // Average Flux F_(i+1/2) is calculated as 1/2(FL+FR) - 1/2(k)
 
         rho_f[i] = 0.5*(rho_flux+rho_flux_r) - 0.5*(k1);
         rhou_f[i] = 0.5*(mom_flux+mom_flux_r) - 0.5*(k2);
-        E_f[i] = 0.5*(E_flux+E_flux_r) - 0.5*(k3);
+        E_f[i] = 0.5*(E_flux+E_flux_r) - 0.5*(k3); // flux in term of energy
     }
 
     // Once fluxes are calculated, can now calculate values
@@ -1072,10 +1072,8 @@ void SodShockRoe::apply_step(){
         uSolutions_[i] = fabs(rho_u_[i]/rho_[i]);
 
         // Update from enthalpy the energy
-        E_[i] = E_sol_corr[i]*rho_[i]-pressure_[i];
-
+        E_[i] = fabs(E_sol_corr[i]*rho_[i]-pressure_[i]);
     }
-
     // Add to time
     T_ += dt_;
 }

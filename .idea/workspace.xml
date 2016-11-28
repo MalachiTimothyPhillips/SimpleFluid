@@ -12,28 +12,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3cf72f63-205a-41ec-bcb3-5bc56d8a00f6" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/BoundaryCond.cpp" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/BoundaryCond.h" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/BoundaryCond.cpp.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/BoundaryCond.h.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/CMakeLists.txt.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/IntCond.cpp.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/IntCond.h.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/RuntimeJoke.cpp.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/RuntimeJoke.h.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/RuntimeParameters.cpp.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/RuntimeParameters.h.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/SolutionProcedure.cpp.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/SolutionProcedure.h.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/index.html" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exportToHTML/main.cpp.html" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/FluidEquation.cpp" afterPath="$PROJECT_DIR$/FluidEquation.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/FluidEquation.h" afterPath="$PROJECT_DIR$/FluidEquation.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IntCond.cpp" afterPath="$PROJECT_DIR$/IntCond.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/IntCond.h" afterPath="$PROJECT_DIR$/IntCond.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SolutionProcedure.h" afterPath="$PROJECT_DIR$/SolutionProcedure.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.cpp" afterPath="$PROJECT_DIR$/main.cpp" />
     </list>
     <ignored path="CFD_HW.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -124,8 +104,8 @@
       <file leaf-file-name="FluidEquation.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/FluidEquation.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3093">
-              <caret line="1063" column="0" selection-start-line="1063" selection-start-column="0" selection-end-line="1063" selection-end-column="0" />
+            <state relative-caret-position="1871">
+              <caret line="1054" column="0" selection-start-line="1054" selection-start-column="0" selection-end-line="1054" selection-end-column="0" />
               <folding>
                 <element signature="e#51#77#0" expanded="true" />
                 <element signature="e#202#214#0" expanded="true" />
@@ -549,11 +529,15 @@
       <workItem from="1480293029869" duration="627000" />
       <workItem from="1480293665087" duration="14000" />
       <workItem from="1480299225543" duration="3108000" />
+      <workItem from="1480305316026" duration="2596000" />
+      <workItem from="1480349592086" duration="315000" />
+      <workItem from="1480350177399" duration="1025000" />
+      <workItem from="1480362980742" duration="19000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="249474000" />
+    <option name="totallyTimeSpent" value="253429000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1280" height="723" extended-state="6" />
@@ -561,23 +545,23 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16484375" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25382262" sideWeight="0.41729012" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5561097" order="11" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32721713" sideWeight="0.44389027" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.235474" sideWeight="0.48379052" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25382262" sideWeight="0.41729012" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32721713" sideWeight="0.44389027" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32874617" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32874617" sideWeight="0.4970906" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.235474" sideWeight="0.48379052" order="3" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -614,7 +598,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="31" />
+      <option name="time" value="34" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -881,14 +865,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/SolutionProcedure.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="855">
-          <caret line="57" column="5" selection-start-line="57" selection-start-column="5" selection-end-line="57" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/RuntimeParameters.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
@@ -907,13 +883,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/IntCond.cpp">
+    <entry file="file://$PROJECT_DIR$/FluidEquation.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1875">
-          <caret line="125" column="41" selection-start-line="125" selection-start-column="41" selection-end-line="125" selection-end-column="41" />
+        <state relative-caret-position="1871">
+          <caret line="1054" column="0" selection-start-line="1054" selection-start-column="0" selection-end-line="1054" selection-end-column="0" />
           <folding>
-            <element signature="e#50#70#0" expanded="true" />
+            <element signature="e#51#77#0" expanded="true" />
+            <element signature="e#202#214#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SolutionProcedure.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="855">
+          <caret line="57" column="5" selection-start-line="57" selection-start-column="5" selection-end-line="57" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -927,13 +912,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/FluidEquation.cpp">
+    <entry file="file://$PROJECT_DIR$/IntCond.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3093">
-          <caret line="1063" column="0" selection-start-line="1063" selection-start-column="0" selection-end-line="1063" selection-end-column="0" />
+        <state relative-caret-position="1875">
+          <caret line="125" column="41" selection-start-line="125" selection-start-column="41" selection-end-line="125" selection-end-column="41" />
           <folding>
-            <element signature="e#51#77#0" expanded="true" />
-            <element signature="e#202#214#0" expanded="true" />
+            <element signature="e#50#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
