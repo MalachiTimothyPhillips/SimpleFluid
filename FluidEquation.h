@@ -324,6 +324,23 @@ protected:
 private:
 };
 
+//============================================================================================================
+/*
+ * TVD Scheme with UltraBee Flux Limiter for Sod Shock Tube
+ */
+//============================================================================================================
+class SodShockUB : public SodShockBase{
+public:
+    // constructor
+    SodShockUB(std::vector<double>&args);
+    virtual void apply_step();
+    void write_to_file(std::string& template_file_name, unsigned int currentStep);
+    void flux(double r, double c, double& val);
+
+protected:
+private:
+};
+
 
 //============================================================================================================
 /*

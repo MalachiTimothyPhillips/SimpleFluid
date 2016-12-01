@@ -62,6 +62,9 @@ FluidEquation *FluidEquation::make_fluid_equation(std::string &equationType, std
     if (equationType == "SodShockRoe"){
         return new SodShockRoe(args);
     }
+    if (equationType == "SodShockUB"){
+        return new SodShockUB(args);
+    }
 }
 
 
@@ -380,7 +383,7 @@ void SodShockUpwind::apply_step(){
         E_sol[i] = E_[i] - d_idx*t_const*(u_curr*(E_[i]+pressure_[i])-uSolutions_[prev]*
                                                                               (E_[prev]+pressure_[prev]));
         rhou_sol[i] = rho_u_[i] - d_idx*t_const*(rho_u_[i]*u_curr - rho_u_[prev]*uSolutions_[prev])
-                - 0.5*t_const*(pressure_[i+1]-pressure_[i]);
+                - 0.5*t_const*(pressure_[i+1]-pressure_[i-1]);
     }
 
     // Write solutions
@@ -709,7 +712,7 @@ void SodShockLaxWendroffDissipation::apply_step(){
     std::vector<double> E_sol_f;
     E_sol_f.assign(nl_,0.0);
 
-    double nu = 0.01; // Try this as a starting point
+    double nu = 0.09; // Try this as a starting point
 
     for (unsigned int i = 1; i < nl_-1;++i){
         rhou_sol_f[i] = rhou_sol_corr[i] + nu*t_const*(rhou_sol_corr[i+1]*rhou_sol_corr[i+1]-2.*(rhou_sol_corr[i+1]-rhou_sol_corr[i])*(rhou_sol_corr[i]-rhou_sol_corr[i-1])
@@ -782,7 +785,7 @@ void SodShockRusanov::apply_step(){
     std::vector<double> E_sol;
     E_sol.assign(nl_,0.0);
 
-    double w = 1.05;//0.5*(eps_ + 1/eps_); // Use average of CFL+1/CFL
+    double w = 0.7;//0.5*(eps_ + 1/eps_); // Use average of CFL+1/CFL
 
     // Dimension alpha vector
     std::vector<double> alpha;
@@ -1098,6 +1101,161 @@ void SodShockRoe::apply_step(){
     T_ += dt_;
 }
 
+//============================================================================================================
+/*
+ * TVD Scheme with UltraBee Flux Limiter for Sod Shock Tube
+ */
+//============================================================================================================
+SodShockUB::SodShockUB(std::vector<double>& args) : SodShockBase(args){
+    // Nothing to do in constructor
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockUB::write_to_file(std::string &template_file_name, unsigned int currentStep) {
+    SodShockBase::write_to_file(template_file_name, currentStep); // Same as base
+}
+
+//------------------------------------------------------------------------------------------------------------
+void SodShockUB::apply_step(){
+
+    // Determine the step size for the current step
+
+    // Find largest local speed of fluid
+    double c_max = 0.0;
+    for (unsigned int i = 0 ; i < nl_; ++i){
+        double curr_cmax;
+        curr_cmax = sqrt(gamma_*pressure_[i]/rho_[i]);
+        if (curr_cmax > c_max){
+            c_max = curr_cmax;
+        }
+    }
+    // Find maximum speed
+    double umax = *(std::max_element(std::begin(uSolutions_), std::end(uSolutions_))); // largest speed
+
+    // Add the two
+    double speed = fabs(c_max) + fabs(umax);
+
+    // Calculate current dt from CFL condition
+    dt_ = eps_*dx_/speed;
+
+    double t_const  = dt_/dx_;
+    double a = c_max+umax;
+
+    // These are flux vectors
+    std::vector<double> rho_f;
+    rho_f.assign(nl_,0.0);
+
+    std::vector<double> rhou_f;
+    rhou_f.assign(nl_,0.0);
+
+    std::vector<double> E_f;
+    E_f.assign(nl_,0.0);
+
+    // Calculate fluxes due to Roe's method
+    for (unsigned int i = 1 ; i < nl_-1; ++i) {
+        // Get current wave speed, c
+        double c = sqrt(gamma_*pressure_[i]/rho_[i]);
+        double u = uSolutions_[i];
+        double a_l = (c+u); // local total speed
+        double CFL = a_l*t_const; // use abs in passes
+
+        double r1; // Corresponding to r of each flux to be evaluated (3 total)
+        double r2;
+        double r3;
+        if (a_l > 0.0){
+            // Do upwind change
+            // High probability of having an error (nan)
+            r1 = (rho_[i]-rho_[i-1])/(rho_[i+1]-rho_[i]);
+            r2 = (rho_u_[i]-rho_u_[i-1])/(rho_u_[i+1]-rho_u_[i]);
+            r3 = (E_[i]-E_[i-1])/(E_[i+1]/E_[i]);
+            // Check for nans, if nan, make zero!
+            if (isnan(r1)){
+                r1 = 1.0;
+            }
+            if (isnan(r2)){
+                r2 = 1.0;
+            }
+            if (isnan(r3)){
+                r3 = 1.0;
+            }
+        }
+        if (a_l < 0.0){
+            // Do upwind change
+
+            // High probability of having an error (nan)
+            r1 = (rho_[i+1]-rho_[i])/(rho_[i+1]-rho_[i]);
+            r2 = (rho_u_[i+1]-rho_u_[i])/(rho_u_[i+1]-rho_u_[i]);
+            r3 = (E_[i+1]-E_[i])/(E_[i+1]/E_[i]);
+            // Check for nans, if nan, make zero!
+            if (isnan(r1)){
+                r1 = 1.0;
+            }
+            if (isnan(r2)){
+                r2 = 1.0;
+            }
+            if (isnan(r3)){
+                r3 = 1.0;
+            }
+        }
+        // Once r's are calculated, can find fluxes, passing local CFL
+        double flux1;
+        double flux2;
+        double flux3;
+        flux(r1,fabs(CFL),flux1);
+        flux(r2,fabs(CFL),flux2);
+        flux(r3,fabs(CFL),flux3);
+
+        // Once these are calculated, find the actual flux
+        rho_f[i] = 0.5*(1+flux1)*(a*rho_[i])+0.5*(1-flux1)*(a*rho_[i+1]);
+        rhou_f[i] = 0.5*(1+flux2)*(a*rho_u_[i])+0.5*(1-flux2)*(a*rho_u_[i+1]);
+        E_f[i] = 0.5*(1+flux3)*(a*E_[i])+0.5*(1-flux3)*(a*E_[i+1]);
+    }
+
+    // Once fluxes are calculated, can now calculate values
+    std::vector<double> rho_sol_corr;
+    rho_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> rhou_sol_corr;
+    rhou_sol_corr.assign(nl_,0.0);
+
+    std::vector<double> E_sol_corr;
+    E_sol_corr.assign(nl_,0.0);
+
+    for (unsigned int i = 1; i < nl_-1; ++i){
+        rho_sol_corr[i] = rho_[i] + t_const*(rho_f[i-1]-rho_f[i]);
+        rhou_sol_corr[i] = rho_u_[i] + t_const*(rhou_f[i-1] - rhou_f[i]);
+        E_sol_corr[i] = E_[i] + t_const*(E_f[i-1]-E_f[i]);
+    }
+
+
+    // Write solutions
+    for (unsigned int i = 1 ; i < nl_-1; ++i){ // Only write that which changes
+        rho_[i] = fabs(rho_sol_corr[i]);
+        rho_u_[i] = fabs(rhou_sol_corr[i]);
+        uSolutions_[i] = fabs(rho_u_[i]/rho_[i]);
+
+        // Update E
+        E_[i] = fabs(E_sol_corr[i]);
+
+        // Calculate new pressure
+        pressure_[i] = (E_[i] - 0.5*rho_u_[i] * uSolutions_[i])*(gamma_-1);
+
+    }
+    // Add to time
+    T_ += dt_;
+}
+
+void SodShockUB::flux(double r, double c, double &val) {
+    if (r <= 0.0){
+        val = 1.0;
+    }
+    if (0.0 <= r && r <= c/(1-c)){
+        val = 1.0 - 2.*(1-c)*r/c;
+    }
+    if (r >= c/(1-c)){
+        val = -1.0;
+    }
+}
 
 //============================================================================================================
 /*
